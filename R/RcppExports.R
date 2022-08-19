@@ -5,6 +5,10 @@ insider <- function(data, cfd_factors, column_factor, cfd_indicators, train_indi
     .Call(`_insider_insider`, data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, tol, max_iter)
 }
 
+proximal_gradient <- function(X, y, beta, lambda, alpha, XtX, Xty, tol = 1e-5, max_iter = 100L) {
+    invisible(.Call(`_insider_proximal_gradient`, X, y, beta, lambda, alpha, XtX, Xty, tol, max_iter))
+}
+
 rcpparma_hello_world <- function() {
     .Call(`_insider_rcpparma_hello_world`)
 }

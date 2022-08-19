@@ -33,6 +33,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// proximal_gradient
+void proximal_gradient(const mat& X, const vec& y, vec& beta, const double& lambda, const double& alpha, mat XtX, const vec& Xty, const double& tol, const int& max_iter);
+RcppExport SEXP _insider_proximal_gradient(SEXP XSEXP, SEXP ySEXP, SEXP betaSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP XtXSEXP, SEXP XtySEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< mat >::type XtX(XtXSEXP);
+    Rcpp::traits::input_parameter< const vec& >::type Xty(XtySEXP);
+    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
+    proximal_gradient(X, y, beta, lambda, alpha, XtX, Xty, tol, max_iter);
+    return R_NilValue;
+END_RCPP
+}
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
 RcppExport SEXP _insider_rcpparma_hello_world() {
@@ -79,6 +97,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_insider_insider", (DL_FUNC) &_insider_insider, 11},
+    {"_insider_proximal_gradient", (DL_FUNC) &_insider_proximal_gradient, 9},
     {"_insider_rcpparma_hello_world", (DL_FUNC) &_insider_rcpparma_hello_world, 0},
     {"_insider_rcpparma_outerproduct", (DL_FUNC) &_insider_rcpparma_outerproduct, 1},
     {"_insider_rcpparma_innerproduct", (DL_FUNC) &_insider_rcpparma_innerproduct, 1},
