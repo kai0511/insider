@@ -2,13 +2,12 @@
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::plugins("cpp11")]]
 
+#include "../inst/include/insider_types.h"
 #include <iostream>
-#include <RcppArmadillo.h>
 #include <omp.h>
 #include "coordinate_descent.h"
 #include "utils.h"
 
-using namespace arma;
 using Rcpp::List;
 using Rcpp::Named;
 

@@ -1,12 +1,11 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins("cpp11")]]
 
+#include "../inst/include/insider_types.h"
 #include <iostream>
 #include <RcppArmadillo.h>
 #include "coordinate_descent.h"
 #include "utils.h"
-
-using namespace arma;
 
 // [[Rcpp::export]]
 vec coordinate_descent(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, 

@@ -1,12 +1,12 @@
 Package: insider
 Type: Package
-Title: What the package does (short line)
+Title: INSIDER: Interpretable Sparse Matrix Decomposition for Bulk RNA Expression Data Analysis
 Version: 1.0
 Date: 2022-08-18
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
-Imports: Rcpp (>= 1.0.7), RcppArmadillo
+Author: Dr. ZHAO Kai
+Maintainer: Dr. ZHAO <zhaokai09@gmail.com>
+Description: A novel statistical approach
+License: GPL-3
+Imports: Rcpp (>= 1.0.7), dplyr
 LinkingTo: Rcpp, RcppArmadillo
 Depends: methods

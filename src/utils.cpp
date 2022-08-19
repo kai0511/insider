@@ -1,16 +1,12 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins("cpp11")]]
 
-#define ARMA_USE_BLAS 1
-#define ARMA_USE_LAPACK 1
 
+#include "../inst/include/insider_types.h"
 #include <iostream>
-#include <RcppArmadillo.h>
 #include "utils.h"
 
-using namespace arma;
 using std::pow;
-
 
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha){

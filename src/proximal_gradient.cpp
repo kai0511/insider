@@ -2,13 +2,13 @@
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::plugins("cpp11")]]
 
+#include "../inst/include/insider_types.h"
 #include <iostream>
 #include <RcppArmadillo.h>
 #include <omp.h>
 #include "proximal_gradient.h"
 #include "utils.h"
 
-using namespace arma;
 
 void prox_operator(vec& v, const double& theta){
     // proximal operator for lasso

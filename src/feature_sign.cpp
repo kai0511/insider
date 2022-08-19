@@ -2,13 +2,12 @@
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::plugins("cpp11")]]
 
+#include "../inst/include/insider_types.h"
 #include <iostream>
-#include <RcppArmadillo.h>
 #include <omp.h>
 #include "feature_sign.h"
 #include "utils.h"
 
-using namespace arma;
 
 //[[Rcpp::export]]
 vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart, 

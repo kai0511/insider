@@ -1,0 +1,178 @@
+---
+title: "PrediXcan Data Analysis"
+author: "ZHAO Kai"
+header-includes:
+  - \usepackage[mono=false]{libertine}
+  - \usepackage{xcolor}
+fontsize: 10pt
+output: pdf_document
+mainfont: libertine
+sansfont: libertine
+---
+
+```{r, size="small"}
+suppressPackageStartupMessages({
+  require(ggplot2)
+  require(formatR)
+  require(knitr)
+  require(cluster)
+  require(factoextra)
+  require(dplyr)
+  require(RColorBrewer)
+  require(clusterProfiler)
+  require(org.Hs.eg.db)
+  require(enrichplot)
+  require(stringr)
+  require(forcats)
+  require(DOSE)
+  require(ape)
+  require(qgraph)
+})
+```
+
+```{r}
+truncated_var <- function(x){
+    remove_idx <- c(which.max(x), which.min(x))
+    var(x[-remove_idx])
+}
+wrap_labal <- function(x, width = 60){
+    str_wrap(x, width=60)
+}
+
+split_str <- function(s){
+    # l <- unlist(strsplit(s, split=c('-|_')))
+    l <- unlist(strsplit(s, split=c('_')))
+    idx <- which(l == 'v7')
+    len <- length(l)
+
+    disease <- l[1]
+    tissue <- paste(l[(idx + 1): len], collapse = '_')
+    c(disease, tissue)
+}
+```
+
+```{r}
+load("~/data/Results/prediXcan/predXcan_l1l2_penalty_18.RData")
+attach(fitted_obj) # attach it for easy syntax
+str(fitted_obj) # show the structure of our result
+
+meta_info <- t(unname(sapply(rownames(trainset), function(s) split_str(s))))
+
+confounders <- as.data.frame(meta_info, stringsAsFactors = T)
+colnames(confounders) <- c('disease', 'tissue')
+
+rownames(disease_factor) <- levels(confounders[[1]])
+rownames(tissue_factor) <- levels(confounders[[2]])
+colnames(column_factor) <- colnames(trainset)
+
+gene_symbol <- sapply(colnames(trainset), function(x) unlist(strsplit(x, ".", fixed = T))[1])
+gene_symbol <- unname(gene_symbol)
+mapping <- bitr(gene_symbol, fromType = "SYMBOL", 
+                toType = c("ENTREZID", "SYMBOL"), 
+                OrgDb = org.Hs.eg.db)
+mapping <- mapping[mapping[[2]] != 100505381,]
+rownames(mapping) <- mapping[, 1]
+```
+
+## Explore the cluster between psychiatric disorders
+The dendogram is used to show the closeness between different psychiatric disorders.
+
+```{r, fig.height=6, size="small"}
+scores <- t(cor(t(disease_factor), t(disease_factor)))
+disease_names <- rownames(disease_factor)
+
+# select top 3 correlated disease as an example
+result <- t(apply(scores, 1, function(x) disease_names[order(x, decreasing = T)][2:4]))
+print(result)
+
+# use dendogram to visually show the relationship between between different diseases
+dis <- dist(disease_factor, method = "euclidean") # distance matrix
+fit <- hclust(dis, method="ward") 
+plot(fit) # display dendogram
+```
+
+## Explore association between different diseases
+In this part, we explored the biogical processes (BPs) enriched by the pseudo expression profile of MDD. This analysis aims to discover the BPs involved in all brain regions included in our study.
+
+\textcolor{red}{However, there is no BPs found. In my opinion, MDD may affect only several not all brain regions, so the pattern related to MDD is covered by expression of other brain regions. Also, I tried other disease like SCZ, and the situation is also similar.}
+
+```{r, fig.height=7, size="small"}
+disease_matrix <- (disease_factor %*% column_factor)
+
+# use MDD as an example
+disease_id <- 16
+cutoffs <- quantile(disease_matrix[disease_id,], probs = seq(0, 1, 0.025))
+colnames(disease_matrix) <- colnames(trainset)
+
+# up-regulation, select the highest quantile
+selected <- (disease_matrix[disease_id,] >= cutoffs[length(cutoffs) - 1]) 
+
+# cutoffs <- quantile(column_factor[metagene_id,], probs = seq(0, 1, 0.05))
+# selected <- (column_factor[metagene_id,] >= cutoffs[length(cutoffs) - 1]) # 
+
+upreg <- enrichGO(gene = na.omit(mapping[gene_symbol[selected], 2]),
+                  OrgDb = 'org.Hs.eg.db',
+                  ont = "BP",
+                  readable = TRUE)
+if(nrow(upreg) > 0){
+    dotplot(upreg, font = 9, showCategory=30) + 
+    scale_y_discrete(labels = function(x) str_wrap(x, width=60))
+} else {
+    cat("No BPs are enriched with the gene list!åå")
+}
+
+# the object from enrichGO can be converted to data frame with the following.
+# result <- data.frame(upreg)
+# save(upreg, file = paste0('metagene', metagene_id, 'upreg_dev_pathway.RData'))
+
+# down-regulation,  select the lowest quantile
+selected <- (disease_matrix[disease_id,] <= cutoffs[2])
+downreg <- enrichGO(gene = na.omit(mapping[gene_symbol[selected], 2]),
+                    OrgDb = 'org.Hs.eg.db',
+                    ont = "BP",
+                    readable = TRUE)
+if(nrow(downreg) > 0){
+    dotplot(downreg, font = 9, showCategory=30) + 
+    scale_y_discrete(labels = function(x) wrap_labal(x))
+} else {
+    cat("No BPs are enriched with the gene list!")
+}
+# save(upreg, file = paste0('metagene', metagene_id, 'downreg_dev_pathway.RData'))
+```
+
+## Explore the association between diseases and tissues and its mechanism
+In the analyis below, we first explore the association between diseases and tissues. We list top three relevant brain regions for each disorder.
+
+```{r}
+tissue_names <- rownames(tissue_factor)
+scores <- cor(t(disease_factor), t(tissue_factor))
+
+result <- t(apply(scores, 1, function(x) tissue_names[order(x, decreasing = T)][1:3]))
+print(result)
+```
+
+Then, we try to reveal the BPs that enriched by the interaction between substantia nigra and depression symptoms. Here we are interested in the down regulated BPs. 
+
+```{r}
+
+disease_name <- "DepSymptoms"
+tissue_name <- "Brain_Substantia_nigra"
+
+interaction <- disease_factor[disease_name, ] * tissue_factor[tissue_name,]
+profile <- interaction %*% column_factor
+cutoffs <- quantile(profile, probs = seq(0, 1, 0.025))
+# selected <- (profile >= cutoffs[length(cutoffs)-1])
+selected <- (profile <= cutoffs[2])
+
+downreg <- enrichGO(gene = na.omit(mapping[gene_symbol[selected], 2]),
+                    OrgDb = 'org.Hs.eg.db',
+                    ont = "BP",
+                    readable = TRUE)
+
+if(nrow(downreg) > 0){
+    dotplot(downreg, font = 9, showCategory=30) + 
+    scale_y_discrete(labels = function(x) wrap_labal(x))
+} else {
+    cat("No BPs are enriched with the gene list!")
+}
+```

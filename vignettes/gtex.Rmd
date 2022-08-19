@@ -1,0 +1,164 @@
+---
+title: "GTEx data analysis"
+author: "ZHAO Kai"
+header-includes:
+  - \usepackage[mono=false]{libertine}
+fontsize: 10pt
+output: pdf_document
+mainfont: libertine
+sansfont: libertine
+---
+
+Here is a brief introduction of analyzing the results of our proposed approach on [GTEx](https://https://www.gtexportal.org). In this analysis, we considered to model the variance contributed by gender, brain regions, and genes.
+
+##  Preparations
+```{r, size="small"}
+suppressPackageStartupMessages({
+  require(ggplot2)
+  require(formatR)
+  require(knitr)
+  require(cluster)
+  require(factoextra)
+  require(dplyr)
+  require(RColorBrewer)
+  require(clusterProfiler)
+  require(org.Hs.eg.db)
+  require(enrichplot)
+  require(stringr)
+  require(forcats)
+  require(DOSE)
+  require(extrafont)
+})
+
+truncated_var <- function(x){
+    remove_idx <- c(which.max(x), which.min(x))
+    var(x[-remove_idx])
+}
+wrap_labal <- function(x, width = 60){
+    str_wrap(x, width=60)
+}
+```
+
+
+```{r}
+loadfonts(quiet = T)
+setwd("~/data/Results/gtex")
+load("GTEX_l1l2_penalty_13.RData")
+str(fitted_obj)
+attach(fitted_obj)  # greatest positive difference
+
+donor_info <- read.csv("meta.csv", stringsAsFactors = F)
+
+load("included_gene_mapping.RData")
+ensg_id <- gsub(included_gene_mapping[[1]], pattern="\\.[0-9]+$", replacement="")
+meta <- data.frame(ensg_id, included_gene_mapping, stringsAsFactors = F)
+
+cat("Overall age distribution:\n")
+print(table(donor_info[,c(3,4)]))
+```
+
+## Investigate the difference in BPs between both genders across different brain regions
+
+We considered all metagenes in this analysis. The figure below shows the up-regulated BPs of genes with the greatest positive difference between male and female. 
+
+```{r, fig.height=6, size="small"}
+metagene_var <- apply(gender_factor, 2, function(x) abs(x[1] - x[2]))
+ord <- order(metagene_var, decreasing = T)
+
+k <- 13
+gender_expr_proflies <- gender_factor[, ord[1:k]] %*% column_factor[ord[1:k],]
+colnames(gender_expr_proflies) <- colnames(trainset)
+
+# The first row stands for the male and the second for the female.
+diff <- gender_expr_proflies[1, ] - gender_expr_proflies[2, ]
+
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+# selected <- (diff <= cutoffs[2]) # greatest negative difference
+selected <- (diff >= cutoffs[length(cutoffs)-1])
+
+upreg <- enrichGO(gene      = unique(meta[selected,1]),
+                  OrgDb     = 'org.Hs.eg.db',
+                  keyType   = 'ENSEMBL',
+                  ont       = "BP",
+                  readable  = TRUE)
+
+# summary(upreg)
+dotplot(upreg, font.size = 9, showCategory=30) +
+  scale_y_discrete(labels = function(x) wrap_labal(x)) + 
+  theme(text=element_text(family="Times New Roman"))
+```
+
+The figure below shows the down-regulated BPs of genes with the greatest negative difference between male and female. 
+
+```{r, fig.height=7, size="small"}
+k <- 13
+gender_expr_proflies <- gender_factor[, ord[1:k]] %*% column_factor[ord[1:k],]
+diff <- gender_expr_proflies[1, ] - gender_expr_proflies[2, ]
+
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+selected <- (diff <= cutoffs[2]) # greatest negative difference
+
+downreg <- enrichGO(gene          = unique(meta[selected,1]),
+                    OrgDb         = 'org.Hs.eg.db',
+                    keyType       = 'ENSEMBL',
+                    ont           = "BP",
+                    readable      = TRUE)
+dotplot(downreg, font.size = 9, showCategory=30) +
+  scale_y_discrete(labels = function(x) wrap_labal(x)) + 
+  theme(text=element_text(family="Times New Roman"))
+```
+
+## Investigate BPs invloving in the interaction between genders and different brain regions
+
+In the analysis, we explored the BPs of genes showing the difference in the brain region in which there is the greatest difference in correlation between both gender.
+
+```{r, fig.height=6, size="small"}
+rownames(tissue_factor) <- unique(donor_info[[7]])
+rownames(gender_factor) <- c("male", "female")
+gender_tissue <- cor(t(gender_factor[,-c(2,9,12)]), t(tissue_factor[,-c(2,9,12)]))
+
+# idx <- which(rownames(tissue_factor) == "Brain - Nucleus accumbens (basal ganglia)")
+# idx <- 11
+idx <- order(apply(gender_tissue, 2, function(x) abs(x[1] - x[2])), decreasing = T)[1]
+
+cat("Overall age distribution:", rownames(tissue_factor)[idx], "\n")
+print(table(donor_info[donor_info$SMTSD == rownames(tissue_factor)[idx],c(3,4)]))
+
+interaction <- t(apply(gender_factor, 1, function(x) x * tissue_factor[idx,]))
+interaction_var <- apply(interaction, 2, var)
+ord <- order(interaction_var, decreasing = T)
+```
+
+```{r, fig.height=6, size="small"}
+k <- 8  # 4
+interaction_profiles <- interaction[, ord[1:k]] %*% column_factor[ord[1:k],]
+diff <- interaction_profiles[1, ] - interaction_profiles[2, ]
+
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+selected <- (diff <= cutoffs[2]) # greatest negative difference
+
+downreg <- enrichGO(gene      = unique(meta[selected,1]),
+                    OrgDb       = 'org.Hs.eg.db',
+                    keyType     = 'ENSEMBL',
+                    ont         = "BP",
+                    readable    = TRUE)
+dotplot(downreg, font.size = 9, showCategory=30) +
+  scale_y_discrete(labels = function(x) wrap_labal(x)) + 
+  theme(text=element_text(family="Times New Roman"))
+```
+
+```{r, fig.height=6, size="small"}
+k <- 8  # 6
+interaction_profiles <- interaction[, ord[1:k]] %*% column_factor[ord[1:k],]
+diff <- interaction_profiles[1, ] - interaction_profiles[2, ]
+selected <- (diff >= cutoffs[length(cutoffs)-1])
+
+upreg <- enrichGO(gene       = unique(meta[selected,1]),
+                    OrgDb      = 'org.Hs.eg.db',
+                    keyType    = 'ENSEMBL',
+                    ont        = "BP",
+                    readable   = TRUE)
+dotplot(upreg, font.size = 9, showCategory=30) +
+  scale_y_discrete(labels = function(x) wrap_labal(x)) + 
+  theme(text=element_text(family="Times New Roman"))
+```
