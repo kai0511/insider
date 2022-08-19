@@ -21,16 +21,15 @@ void prox_operator(vec& v, const double& theta){
 }
 
 // [[Rcpp::export]]
-void proximal_gradient(const mat& X, const vec& y, vec& beta, 
-                       const double& lambda, const double& alpha, 
-                       mat XtX, const vec& Xty, const double& tol = 1e-5, const int& max_iter = 100){
+vec proximal_gradient(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, 
+                      const mat& XtX, const vec& Xty, const double& tol = 1e-5, const int& max_iter = 100){
     
     // reference see http://www.princeton.edu/~yc5/ele538b_sparsity/lectures/lasso_algorithm_extension.pdf
     // https://web.stanford.edu/~boyd/papers/prox_algs/lasso.html
 
     int col_num = X.n_cols, k = 1;
     double step_size, prev_loss, ridge_loss, loss, neg_eigen, pos_eigen;
-    vec pre_beta, old_beta, vals, gradient, pre_gradient;
+    vec beta = wstart, pre_beta, old_beta, vals, gradient, pre_gradient;
     
     // suggested start
     prev_loss = objective(X, y, beta, lambda, alpha);
@@ -45,7 +44,7 @@ void proximal_gradient(const mat& X, const vec& y, vec& beta,
         step_size = 1.0/pos_eigen;
     }
     
-    XtX.diag() += (1 - alpha) * lambda;
+    // XtX.diag() += (1 - alpha) * lambda;
     // pre_gradient = XtX * beta  - Xty;
     
     do { 
@@ -55,7 +54,7 @@ void proximal_gradient(const mat& X, const vec& y, vec& beta,
             beta = pre_beta + (k - 2)/(k + 1)*(pre_beta - old_beta);
         }
         
-        gradient = XtX * beta  - Xty;
+        gradient = (XtX + (1 - alpha) * lambda * eye(size(XtX))) * beta  - Xty;
         beta -= step_size * gradient;
         prox_operator(beta, lambda * alpha * step_size);
         

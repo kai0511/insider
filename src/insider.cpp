@@ -82,6 +82,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
                   const double& lambda, const double& alpha, const int tuning, const int n_cores = 10, const double tol = 1e-5){
     
     if(tuning == 1){
+
         cube feature_space(c_factor.n_rows, c_factor.n_rows, residual.n_rows);
         for(int i = 0; i < row_factor.n_rows; i++){
             feature_space.slice(i) = row_factor.row(i).t() * row_factor.row(i);
@@ -97,15 +98,13 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             vec outcome = residual.col(i);
             outcome = outcome(row_selected);
             vec Xty = trans(feature) * outcome;
-            vec solution = c_factor.col(i);
 
             if(alpha == 0){
                 // mat left_matrix = XtX + lambda * eye(c_factor.n_rows, c_factor.n_rows);
                 XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
-                strong_coordinate_descent(feature, outcome, solution, lambda, alpha, XtX, Xty, tol);
-		c_factor.col(i) = solution;
+                c_factor.col(i) = strong_coordinate_descent(feature, outcome, c_factor.col(i), lambda, alpha, XtX, Xty, tol);
             }
         }
 
@@ -114,32 +113,31 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         mat XtX = trans(row_factor) * row_factor;
         mat Xty = trans(row_factor) * residual;
 
+        if(alpha == 0){
+            XtX.diag() += lambda; 
+        }
+
         #if defined(_OPENMP)
             #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
         #endif
         for(int i = 0; i < residual.n_cols; i++) {
             
             if(alpha == 0){
-                // mat left_matrix = XtX + lambda * eye(c_factor.n_rows, c_factor.n_rows);
-                XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
-                vec solution = c_factor.col(i);
-                strong_coordinate_descent(row_factor, solution, solution, lambda, alpha, XtX, Xty.col(i), tol);
-		c_factor.col(i) = solution;
+                c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i);, lambda, alpha, XtX, Xty.col(i), tol);
             }
         }
-    }else{
+
+    } else{
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
     }
 }
 
 // [[Rcpp::export]]
-List insider(const mat& data, List cfd_factors, mat& column_factor, 
-             const umat& cfd_indicators, const mat& train_indicator, 
-             const int latent_dim, const double lambda, const double alpha, 
-	     const int tuning, double tol = 1e-5, int max_iter = 20000){
+List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
+             const int latent_dim, const double lambda, const double alpha, const int tuning, double tol = 1e-5, int max_iter = 20000){
 
     unsigned int i, iter = 0; 
     int cfd_num = cfd_factors.size();

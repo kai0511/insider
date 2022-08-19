@@ -10,10 +10,9 @@
 
 using namespace arma;
 
-vec feature_sign_with_screening(const mat& X, const vec& y, const vec sugg_start, 
-                                const double lambda, const double alpha, 
-                                const mat& XtX, const vec& Xty, 
-                                const int& max_iter = 1000){
+vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart, 
+                        const double& lambda, const double& alpha, 
+                        const mat& XtX, const vec& Xty, const int& max_iter = 1000){
     /* update (20220610)
         adopt screening rules to filter out coefficients that shrink to zeros.
         for details, see https://statweb.stanford.edu/~tibs/ftp/strong.pdf. 
@@ -25,8 +24,7 @@ vec feature_sign_with_screening(const mat& X, const vec& y, const vec sugg_start
     
     uvec exc_idx, inc_idx, search_idx, violate_idx, remove_idx;
     vec tmp_beta, new_beta, grad, progress;
-    vec beta = sugg_start;
-    vec active_set = ones(col_num), theta = sign(beta);
+    vec beta = wstart, active_set = ones(col_num), theta = sign(beta);
     
     mat X2, Gram;
 

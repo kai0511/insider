@@ -8,8 +8,9 @@
 
 using namespace arma;
 
-void coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lambda, const double& alpha, 
-                        const mat& XtX, const vec& Xty, const double& tol = 1e-5){
+// [[Rcpp::export]]
+vec coordinate_descent(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, 
+                       const mat& XtX, const vec& Xty, const double& tol = 1e-5){
     /* updates (20200829)
         Detail of optimization algorithm, refer to https://ieeexplore.ieee.org/document/6413853.
     Args:
@@ -17,7 +18,7 @@ void coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lam
     */
     
     unsigned int i, k = 0;
-    vec residual;
+    vec beta = wstart, residual;
     double upper_scala, update, pre_loss, iter_loss;
     uvec ord(X.n_cols);
 
@@ -50,11 +51,12 @@ void coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lam
     } 
     while(std::abs(pre_loss - iter_loss) > tol);
 
-    // return beta;
+    return beta;
 }
 
-void strong_coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lambda, const double& alpha, 
-                               const mat& XtX, const vec& Xty, const double& tol = 1e-5){
+// [[Rcpp::export]]
+vec strong_coordinate_descent(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, 
+                              const mat& XtX, const vec& Xty, const double& tol = 1e-5){
     /* update (20200829)
         1. Detail of optimization algorithm, refer to https://ieeexplore.ieee.org/document/6413853.
         2. screening rules to hasten computation(https://statweb.stanford.edu/~tibs/ftp/strong.pdf)
@@ -64,7 +66,7 @@ void strong_coordinate_descent(const mat& X, const vec& y, vec& beta, const doub
     */
     
     unsigned int i, k;
-    vec residual, grad, active_set = ones(beta.n_elem); 
+    vec beta = wstart, active_set = ones(beta.n_elem), residual, grad; 
     double upper_scala, update, pre_loss, iter_loss;
     uvec ord, inc_idx, violated_idx;
 
@@ -122,4 +124,5 @@ void strong_coordinate_descent(const mat& X, const vec& y, vec& beta, const doub
             active_set(ex_idx(violated_idx)).ones();
         }
     }
+    return beta;
 }
