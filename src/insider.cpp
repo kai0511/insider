@@ -125,7 +125,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             if(alpha == 0){
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
-                c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i);, lambda, alpha, XtX, Xty.col(i), tol);
+                c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i), lambda, alpha, XtX, Xty.col(i), tol);
             }
         }
 

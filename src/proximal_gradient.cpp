@@ -8,6 +8,7 @@
 #include "proximal_gradient.h"
 #include "utils.h"
 
+using namespace arma;
 
 void prox_operator(vec& v, const double& theta){
     // proximal operator for lasso
@@ -69,5 +70,5 @@ vec proximal_gradient(const mat& X, const vec& y, const vec& wstart, const doubl
         k++;
     }
     while(k <= max_iter);
-    // return beta;
+    return beta;
 }
