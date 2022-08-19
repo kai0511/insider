@@ -53,7 +53,7 @@ void coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lam
     // return beta;
 }
 
-void strong_coordinate_descent(const mat& X, const vec y, vec& beta, const double& lambda, const double& alpha, 
+void strong_coordinate_descent(const mat& X, const vec& y, vec& beta, const double& lambda, const double& alpha, 
                                const mat& XtX, const vec& Xty, const double& tol = 1e-5){
     /* update (20200829)
         1. Detail of optimization algorithm, refer to https://ieeexplore.ieee.org/document/6413853.
