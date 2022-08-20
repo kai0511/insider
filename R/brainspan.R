@@ -4,7 +4,7 @@
 # For details see my note, derivartion for matrix factorization.
 # This version is a mature alpha version, and some improvement is in progess.
 ##############################################
-options(error = dump_and_quit())
+# options(error = dump_and_quit())
 
 num_factors <- 32 
 

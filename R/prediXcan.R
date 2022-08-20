@@ -7,8 +7,8 @@
 
 load('~/data/zscore_matrix_selected.RData')
 
-zscore[is.na(zscore)] <- 0
-splitted <- ratio_splitter(zscore, return.indicator = T)
+dataset[is.na(dataset)] <- 0
+splitted <- ratio_splitter(dataset)
 trainset <- splitted$trainset
 testset <- splitted$testset
 train_indicator <- (trainset != 0)
