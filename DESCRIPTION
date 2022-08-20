@@ -10,3 +10,4 @@ License: GPL-3
 Imports: Rcpp (>= 1.0.7), dplyr
 LinkingTo: Rcpp, RcppArmadillo
 Depends: methods
+

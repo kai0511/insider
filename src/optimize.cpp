@@ -136,7 +136,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
 // [[Rcpp::export]]
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
-              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol,  const double sub_tol = 1e-5, const int max_iter = 10000){
+              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const int max_iter = 10000){
 
     unsigned int i, iter = 0; 
     int cfd_num = cfd_factors.size();

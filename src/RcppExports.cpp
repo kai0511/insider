@@ -66,9 +66,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// insider
-List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const int latent_dim, const double lambda, const double alpha, const int tuning, double tol, int max_iter);
-RcppExport SEXP _insider_insider(SEXP dataSEXP, SEXP cfd_factorsSEXP, SEXP column_factorSEXP, SEXP cfd_indicatorsSEXP, SEXP train_indicatorSEXP, SEXP latent_dimSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
+// optimize
+List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const int latent_dim, const double lambda, const double alpha, const int tuning, const double global_tol, const double sub_tol, const int max_iter);
+RcppExport SEXP _insider_optimize(SEXP dataSEXP, SEXP cfd_factorsSEXP, SEXP column_factorSEXP, SEXP cfd_indicatorsSEXP, SEXP train_indicatorSEXP, SEXP latent_dimSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP global_tolSEXP, SEXP sub_tolSEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -81,9 +81,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const int >::type tuning(tuningSEXP);
-    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(insider(data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, tol, max_iter));
+    Rcpp::traits::input_parameter< const double >::type global_tol(global_tolSEXP);
+    Rcpp::traits::input_parameter< const double >::type sub_tol(sub_tolSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
+    rcpp_result_gen = Rcpp::wrap(optimize(data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, global_tol, sub_tol, max_iter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -111,7 +112,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_insider_coordinate_descent", (DL_FUNC) &_insider_coordinate_descent, 8},
     {"_insider_strong_coordinate_descent", (DL_FUNC) &_insider_strong_coordinate_descent, 8},
     {"_insider_strong_feature_sign", (DL_FUNC) &_insider_strong_feature_sign, 8},
-    {"_insider_insider", (DL_FUNC) &_insider_insider, 11},
+    {"_insider_optimize", (DL_FUNC) &_insider_optimize, 12},
     {"_insider_proximal_gradient", (DL_FUNC) &_insider_proximal_gradient, 9},
     {NULL, NULL, 0}
 };

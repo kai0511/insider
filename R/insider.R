@@ -48,7 +48,7 @@ tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 
             confounder_num <- ncol(confounder)
             confounder_list <- lapply(1:confounder_num, function(i){
                 factor_num <- unique(confounder[,i])
-                matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank))
+                matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
             })
             
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
@@ -79,7 +79,7 @@ tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 
         confounder_num <- ncol(confounder)
         confounder_list <- lapply(1:confounder_num, function(i){
             factor_num <- unique(confounder[,i])
-            matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank))
+            matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
         })
     
         column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
@@ -116,7 +116,7 @@ fit.insider <- function(object, latent_dimension = NULL, lambda = NULL, alpha = 
     confounder_num <- ncol(confounder)
     confounder_list <- lapply(1:confounder_num, function(i){
         factor_num <- unique(confounder[,i])
-        matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank))
+        matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
     })
 
     column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
