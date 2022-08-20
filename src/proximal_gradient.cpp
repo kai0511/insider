@@ -29,11 +29,11 @@ vec proximal_gradient(const mat& X, const vec& y, const vec& wstart, const doubl
     // https://web.stanford.edu/~boyd/papers/prox_algs/lasso.html
 
     int col_num = X.n_cols, k = 1;
-    double step_size, prev_loss, ridge_loss, loss, neg_eigen, pos_eigen;
+    double step_size, neg_eigen, pos_eigen; // prev_loss, loss
     vec beta = wstart, pre_beta, old_beta, vals, gradient, pre_gradient;
     
     // suggested start
-    prev_loss = objective(X, y, beta, lambda, alpha);
+    // prev_loss = objective(X, y, beta, lambda, alpha);
         
     vals = eig_sym(XtX);
     neg_eigen = vals(0);

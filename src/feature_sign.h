@@ -7,6 +7,6 @@ using namespace arma;
 
 vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart, 
                         const double& lambda, const double& alpha, 
-                        const mat& XtX, const vec& Xty, const int& max_iter /*= 1000*/);
+                        const mat& XtX, const vec& Xty, const unsigned int& max_iter /*= 1000*/);
 
 #endif

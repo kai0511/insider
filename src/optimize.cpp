@@ -25,7 +25,7 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
     if(tuning == 1){
         
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(int i = 0; i < seq.size(); i++) {
+        for(unsigned int i = 0; i < seq.size(); i++) {
 
             uvec non_zeros; 
             mat feaures, XtX = zeros(c_factor.n_rows, c_factor.n_rows);
@@ -33,7 +33,7 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
             uvec ids = find(updating_confd == seq(i));
 
-            for(int k = 0; k < ids.n_elem; k++){
+            for(unsigned int k = 0; k < ids.n_elem; k++){
                 non_zeros = find(trans(indicator.row(ids(k))));
                 feaures = c_factor.cols(non_zeros); 
 
@@ -54,14 +54,14 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
         mat Xtys = c_factor * trans(residual);
 
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(int i = 0; i < seq.size(); i++) {
+        for(unsigned int i = 0; i < seq.size(); i++) {
 
             uvec non_zeros; 
             mat XtX = zeros(c_factor.n_rows, c_factor.n_rows);
             vec Xty = zeros<vec>(c_factor.n_rows);
 
             uvec ids = find(updating_confd == seq(i));
-            for(int k = 0; k < ids.n_elem; k++){
+            for(unsigned int k = 0; k < ids.n_elem; k++){
                 XtX += gram;
                 Xty += Xtys.col(ids(k));
             }
@@ -83,14 +83,14 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
     if(tuning == 1){
 
         cube feature_space(c_factor.n_rows, c_factor.n_rows, residual.n_rows);
-        for(int i = 0; i < row_factor.n_rows; i++){
+        for(unsigned int i = 0; i < row_factor.n_rows; i++){
             feature_space.slice(i) = row_factor.row(i).t() * row_factor.row(i);
         }
 
         #if defined(_OPENMP)
             #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
         #endif
-        for(int i = 0; i < residual.n_cols; i++) {
+        for(unsigned int i = 0; i < residual.n_cols; i++) {
             uvec row_selected = find(indicator.col(i));
             mat feature = row_factor.rows(row_selected);
             mat XtX = sum(feature_space.slices(row_selected), 2);
@@ -119,7 +119,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         #if defined(_OPENMP)
             #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
         #endif
-        for(int i = 0; i < residual.n_cols; i++) {
+        for(unsigned int i = 0; i < residual.n_cols; i++) {
             
             if(alpha == 0){
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
@@ -136,10 +136,9 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
 // [[Rcpp::export]]
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
-              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const int max_iter = 10000){
+              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
 
-    unsigned int i, iter = 0; 
-    int cfd_num = cfd_factors.size();
+    unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, optimal_rmse, decay = 1.0; 
     mat diff, sub_matrix; 
@@ -200,7 +199,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
             decay = ((pre_loss - loss)/100 >= 1)? 1: 0;
 
-            if(tuning == 1 & optimal_rmse > test_rmse){
+            if((tuning == 1) & (optimal_rmse > test_rmse)){
                 optimal_rmse = test_rmse;
             }
 
