@@ -135,8 +135,8 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 }
 
 // [[Rcpp::export]]
-List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
-             const int latent_dim, const double lambda, const double alpha, const int tuning, double tol = 1e-5, int max_iter = 20000){
+List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
+              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol,  const double sub_tol = 1e-5, const int max_iter = 10000){
 
     unsigned int i, iter = 0; 
     int cfd_num = cfd_factors.size();
@@ -189,7 +189,7 @@ List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& 
         }
 
         // update columm_factor
-        optimize_col(data, train_indicator, row_factor, column_factor, lambda, alpha, tuning, 30, tol = tol * decay);
+        optimize_col(data, train_indicator, row_factor, column_factor, lambda, alpha, tuning, 30, sub_tol * decay);
 
         // check the fitting every 10 steps
         if(iter % 10 == 0){
@@ -204,7 +204,7 @@ List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& 
                 optimal_rmse = test_rmse;
             }
 
-            if((pre_loss - loss)/pre_loss < 1e-9){
+            if((pre_loss - loss)/pre_loss < global_tol){
                 break;
             }
         }
@@ -216,8 +216,7 @@ List insider(const mat& data, List cfd_factors, mat& column_factor, const umat& 
         row_matrices["factor" + std::to_string(i)] = cfd_matrices(i);
     }
 
-    return List::create(Named("train_indicator") = train_indicator, 
-                        Named("row_matrices") = row_matrices,
+    return List::create(Named("row_matrices") = row_matrices,
                         Named("column_factor") = column_factor, 
                         Named("optimal_rmse") = optimal_rmse, 
                         Named("loss") = loss);

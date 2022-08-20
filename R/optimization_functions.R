@@ -1,4 +1,3 @@
-require(methods)
 
 prox_l1 <- function(x, lambda){
     # proximal operator for lasso
@@ -36,59 +35,6 @@ proximal_gradient <- function(A, b, lambda, alpha, ABSTOL = 1e-8, MAX_ITER = 100
             break
         }
         loss_prev <- loss
-    }
-    return(x)
-}
-
-l2_norm <- function(v){
-    sqrt(sum(v^2))
-}
-
-admm <- function(A, b, lambda, alpha, MAX_ITER = 100, ABSTOL = 1e-8, RELTOL = 1e-4){
-    # for detail refer to https://web.stanford.edu/~boyd/papers/prox_algs/lasso.html
-    mu <- 1; rho <- 1/mu
-    m <- nrow(A); n <- ncol(A)
-    AtA <- crossprod(A); Atb <- drop(crossprod(A, b))
-    x <- rep(0, n); z <- rep(0, n); u <- rep(0, n)
-
-    # LU decomposition
-    if(m >= n){
-        L <- chol(crossprod(A) + rho * diag(n))
-    }else{
-        L <- chol(diag(m) + 1/rho * tcrossprod(A))
-    } 
-    U = L
-    L = t(L)
-
-    # iterate till stopping criterion meets
-    for(k in 1:MAX_ITER){
-        # x-update
-        q <- Atb + rho * (z - u)
-
-        if(m >= n){
-            x <- solve(U, solve(L, q))
-        }else{
-            x <- mu * (q - mu * crossprod(A, solve(U, solve(L, A %*% q))))
-        }
-        x <- drop(x)
-
-        # z-update
-        zold <- z
-        z <- 1/(1 + mu * (1 - alpha) * lambda) * prox_l1(x + u, mu * lambda * alpha)
-
-        # u-update
-        u <- u + x - z
-        
-        # diagnostics, reporting, termination checks
-        loss <- objective(A, b, x, lambda, alpha)
-        r_norm <- l2_norm(x-z)
-        s_norm <- l2_norm(-rho * (z - zold))
-        eps_pri <- sqrt(n) * ABSTOL + RELTOL * max(l2_norm(x), l2_norm(-z))
-        eps_dual <- sqrt(n) * ABSTOL + RELTOL * l2_norm(rho*u)
-
-        if(r_norm < eps_pri & s_norm < eps_dual){
-            break
-        }   
     }
     return(x)
 }
@@ -152,8 +98,6 @@ coordinate_descent <- function(X, y, lambda, alpha, beta, ex_idx, thres = 1e-10,
     return(beta)
 }
 
-
-
 safe_cd <- function(X, y, lambda, alpha, thres = 1e-10){
     # for detail of optimization algorithm see: https://ieeexplore.ieee.org/document/6413853
     # screening rules to hasten computation. See: https://statweb.stanford.edu/~tibs/ftp/strong.pdf
@@ -187,14 +131,6 @@ safe_cd <- function(X, y, lambda, alpha, thres = 1e-10){
         }
     }
     return(beta)
-}
-
-
-objective <- function(A, b, beta, lambda, alpha){
-    # the loss for the following objective:
-    # Fomular: 1/2 (A * beta - b)^2 + \lambda [(1-\alpha) ||beta||_2^2 + \alpha ||beta||_1]
-    loss <- sum((A %*% beta - b)^2)/2 + lambda * ((1 - alpha) * sum(beta^2)/2 + alpha * sum(abs(beta)))
-    return(loss)
 }
 
 feature_sign_with_screening <- function(X, y, sugg_start, lambda, alpha, 
