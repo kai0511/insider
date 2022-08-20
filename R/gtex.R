@@ -11,8 +11,7 @@ num_factors <- 13
 lambda <- 44.56  # original value 33.7777777777778
 alpha <- 0.4 # original 0.35
 
-setwd("/home/kai/data/multi_dimensional_datasets")
-load("gtex_brain_sampled_expression_including_phenotype.RData")
+load("/home/kai/data/multi_dimensional_datasets/gtex_brain_sampled_expression_including_phenotype.RData")
 
 # dataset <- as.matrix(dataset)
 # dataset[is.na(dataset)] <- 0

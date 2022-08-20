@@ -13,7 +13,7 @@ num_factors <- 23
 lambda <- 7
 alpha <- 0.2
 
-setwd("~/data/multi_dimensional_datasets/result/ageing/")
+# setwd("~/data/multi_dimensional_datasets/result/ageing/")
 load('~/data/multi_dimensional_datasets/ageing_dataset_annotated_with_phenotypes_filtered.RData')
 dataset[is.na(dataset)] <- 0
 dataset <- dataset[,-1]
