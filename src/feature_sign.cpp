@@ -20,7 +20,7 @@ vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart,
     */
     
     unsigned int k = 0, iter = 0, col_num = X.n_cols, optimality1 = 0, optimality0 = 0;
-    double pre_loss = 0.0, inner_loss = 0.0; // line_search = 0.0;
+    double pre_loss = 0.0, inner_loss = 0.0, line_search = 0.0;
     
     uvec exc_idx, inc_idx, search_idx, violate_idx, remove_idx;
     vec tmp_beta, new_beta, grad, progress;
