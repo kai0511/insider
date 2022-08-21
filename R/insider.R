@@ -1,14 +1,14 @@
-#' Title
+#' create an insider object with the provided parameters
 #'
-#' @param data 
-#' @param confounder 
-#' @param split_ratio 
-#' @param global_tol 
-#' @param sub_tol 
-#' @param tuning_iter 
-#' @param max_iter 
+#' @param data the whole data for insider, including trainset and testset
+#' @param confounder a matrix with each column indicating the belonging for each covariate
+#' @param split_ratio a proportion of elements from data considered as testset
+#' @param global_tol the global convergence creteria
+#' @param sub_tol  the convergence creteria for each elastic net problem
+#' @param tuning_iter number of steps will run in tuning
+#' @param max_iter maxiumme number of steps will run in fitting insider
 #'
-#' @return
+#' @return an insider object
 #' @export
 #'
 #' @examples
@@ -38,14 +38,14 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     return(object)
 }
 
-#' Title
+#' tune hyperparameters for insider object
 #'
-#' @param object 
-#' @param latent_dimension 
-#' @param lambda 
-#' @param alpha 
+#' @param object an insider object
+#' @param latent_dimension the rank of latent representations
+#' @param lambda l2-regularization for insider
+#' @param alpha l1-regularization for insider
 #'
-#' @return
+#' @return tuning results
 #' @export
 #'
 #' @examples
@@ -132,14 +132,14 @@ tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
 }
 
-#' Title
+#' fit insider object
 #'
-#' @param object 
-#' @param latent_dimension 
-#' @param lambda 
-#' @param alpha 
+#' @param object an insider object
+#' @param latent_dimension the rank of latent representations
+#' @param lambda l2-regularization for insider
+#' @param alpha l1-regularization for insider
 #'
-#' @return
+#' @return a fitted insider object
 #' @export
 #'
 #' @examples

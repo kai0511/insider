@@ -1,5 +1,5 @@
 
-# dump objects for easy debugging
+#' dump objects when encounter errors for easy debugging
 #' @export
 dump_and_quit <- function() {
   # Save debugging info to file last.dump.rda
@@ -63,6 +63,17 @@ obtain_indication_matrix <- function(trainset, only_positive = F){
     }
     return(indication_matrix)
 }
+
+#' matrix splitting via element-wise sampling without replacement
+#'
+#' @param data matrix for splitting 
+#' @param ratio a proportion of elements from data considered as testset
+#' @param rm.na.col whether remove columns with all zeros
+#' 
+#' @return a list 
+#' @export
+#'
+#' @examples
 
 ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T){
     # default ratio for test is 0.1, that is, 10% obs. will be randomly assigned to testset
