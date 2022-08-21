@@ -152,13 +152,13 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     confounder_num <- ncol(object[['confounder']])
     confounder_list <- lapply(1:confounder_num, function(i){
         factor_num <- unique(object[['confounder']][,i])
-        matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
+        matrix(init_parameters(factor_num * latent_dimension), ncol = latent_dimension)
     })
 
-    column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
+    column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
     fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                           latent_rank, lambda, alpha, 1, global_tol, sub_tol, max_iter);
+                           latent_dimension, lambda, alpha, 1, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
     object[['column_factor']] <- fitted_obj[['column_factor']]
