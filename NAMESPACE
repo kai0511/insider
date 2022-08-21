@@ -1,4 +1,8 @@
 useDynLib(insider, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 exportPattern("^[[:alpha:]]+")
+export(dump_and_quit)
+export(insider)
+export(tune.insider)
+export(fit.insider)
 # exportPattern("^[^\\\\.]")
