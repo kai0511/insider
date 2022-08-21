@@ -40,10 +40,10 @@ void evaluate(const mat& data, const mat& predictions, mat& residual, const uvec
     }  
 
     if (verbose == 1){
-        cout << "ibiasedMF with L1_penalty iter " << iter << ": train rmse = " << train_rmse << '\n' << endl;
+        cout << "insider iter " << iter << ": train rmse = " << train_rmse << '\n' << endl;
 
         if(tuning == 1){
-            cout << "ibiasedMF with L1_penalty iter " << iter << ": train rmse = " << test_rmse << '\n' << endl;
+            cout << "insider iter " << iter << ": train rmse = " << test_rmse << '\n' << endl;
         }
     }
 }
