@@ -53,7 +53,7 @@ double compute_loss(const field<mat>&& cfd_factor, const mat& column_factor, con
 
     // l2 penalty 
     double row_reg = 0.0;
-    for(unsigned int i = 0, i < cfd_factor.n_elem, i++){
+    for(unsigned int i = 0; i < cfd_factor.n_elem; i++){
         row_reg += lambda * pow(norm(cfd_factor(i), "F"), 2);
     }
     
