@@ -48,11 +48,15 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx,
     }
 }
 
-double compute_loss(const mat& cfd_factor, const mat& column_factor, const double& lambda, const double& alpha, 
+double compute_loss(const field<mat>&& cfd_factor, const mat& column_factor, const double& lambda, const double& alpha, 
                     double& sum_residual, const int& verbose = 1){
 
     // l2 penalty 
-    double row_reg = lambda * pow(norm(cfd_factor, "F"), 2);
+    double row_reg = 0.0;
+    for(unsigned int i = 0, i < cfd_factor.n_elem, i++){
+        row_reg += lambda * pow(norm(cfd_factor(i), "F"), 2);
+    }
+    
     double col_reg = lambda * (1 - alpha) * pow(norm(column_factor, "F"), 2);
     
     //  l1 penalty

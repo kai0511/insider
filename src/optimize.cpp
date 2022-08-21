@@ -169,7 +169,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     predict(row_factor, column_factor, predictions);
     residual = data - predictions;
     evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
-    loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
+    loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
 
     while(iter < max_iter) {
 
@@ -203,7 +203,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         if(iter % 10 == 0){
             pre_loss = loss;
             evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
-            loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
+            loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
 
             cout << "Delta loss for iter " << iter << ":" << pre_loss - loss << endl;
 
