@@ -1,3 +1,4 @@
+#' @export
 insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 100, max_iter = 50000){
 
     # split data into two pieces
@@ -24,6 +25,7 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     return(object)
 }
 
+#' @export
 tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     
     if(!is.integer(latent_dimension) | !is.numeric(lambda) | !is.numeric(alpha)){
@@ -107,6 +109,7 @@ tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
 }
 
+#' @export
 fit.insider <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     
     global_tol <- object[['params']][['global_tol']]
