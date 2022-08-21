@@ -49,7 +49,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // strong_feature_sign
-vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, const mat& XtX, const vec& Xty, const int& max_iter);
+vec strong_feature_sign(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, const mat& XtX, const vec& Xty, const unsigned int& max_iter);
 RcppExport SEXP _insider_strong_feature_sign(SEXP XSEXP, SEXP ySEXP, SEXP wstartSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP XtXSEXP, SEXP XtySEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -61,13 +61,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const mat& >::type XtX(XtXSEXP);
     Rcpp::traits::input_parameter< const vec& >::type Xty(XtySEXP);
-    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const unsigned int& >::type max_iter(max_iterSEXP);
     rcpp_result_gen = Rcpp::wrap(strong_feature_sign(X, y, wstart, lambda, alpha, XtX, Xty, max_iter));
     return rcpp_result_gen;
 END_RCPP
 }
 // optimize
-List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const int latent_dim, const double lambda, const double alpha, const int tuning, const double global_tol, const double sub_tol, const int max_iter);
+List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const int latent_dim, const double lambda, const double alpha, const int tuning, const double global_tol, const double sub_tol, const unsigned int max_iter);
 RcppExport SEXP _insider_optimize(SEXP dataSEXP, SEXP cfd_factorsSEXP, SEXP column_factorSEXP, SEXP cfd_indicatorsSEXP, SEXP train_indicatorSEXP, SEXP latent_dimSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP global_tolSEXP, SEXP sub_tolSEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -83,7 +83,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type tuning(tuningSEXP);
     Rcpp::traits::input_parameter< const double >::type global_tol(global_tolSEXP);
     Rcpp::traits::input_parameter< const double >::type sub_tol(sub_tolSEXP);
-    Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type max_iter(max_iterSEXP);
     rcpp_result_gen = Rcpp::wrap(optimize(data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, global_tol, sub_tol, max_iter));
     return rcpp_result_gen;
 END_RCPP
