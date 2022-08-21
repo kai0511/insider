@@ -136,9 +136,10 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
 // [[Rcpp::export]]
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
-              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
+              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-6, const unsigned int max_iter = 10000){
     
     cout.precision(12);
+    double delta_loss;
     unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, optimal_rmse, decay = 1.0; 
@@ -199,7 +200,22 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
 
             cout << "Delta loss for iter " , iter, ":" << pre_loss - loss << endl;
-            decay = ((pre_loss - loss)/100 >= 1)? 1: 0;
+
+            if(pre_loss - loss)/1000 <= 1e-6){
+                decay = 1e-6;
+            }else if(pre_loss - loss)/1000 <= 1e-5){
+                decay = 1e-5;
+            }else if(pre_loss - loss)/1000 <= 1e-4){
+                decay = 1e-4;
+            }else if(pre_loss - loss)/1000 <= 1e-3){
+                decay = 1e-3;
+            }else if(pre_loss - loss)/1000 <= 1e-2){
+                decay = 1e-2;
+            }else if(pre_loss - loss)/1000 <= 1e-1){
+                decay = 1e-1;
+            }else{
+                decay = 1.0;
+            }
 
             if((tuning == 1) & (optimal_rmse > test_rmse)){
                 optimal_rmse = test_rmse;
