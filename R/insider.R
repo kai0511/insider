@@ -11,7 +11,7 @@
 #' @return an insider object
 #' @export
 #'
-#' @examples
+#' @examples ..
 insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 100, max_iter = 50000){
 
     # split data into two pieces
@@ -48,8 +48,8 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
 #' @return tuning results
 #' @export
 #'
-#' @examples
-tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
+#' @examples ..
+tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     
     if(!is.integer(latent_dimension) | !is.numeric(lambda) | !is.numeric(alpha)){
         stop("TUNNING: The element of latent_dimension, lambda, and alpha should be integer, numeric, and numeric.")
@@ -142,16 +142,16 @@ tune.insider <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 
 #' @return a fitted insider object
 #' @export
 #'
-#' @examples
-fit.insider <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
+#' @examples ..
+fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     
     global_tol <- object[['params']][['global_tol']]
     sub_tol <- object[['params']][['sub_tol']]
     max_iter <- object[['params']][['max_iter']]
-
-    confounder_num <- ncol(confounder)
+    
+    confounder_num <- ncol(object[['confounder']])
     confounder_list <- lapply(1:confounder_num, function(i){
-        factor_num <- unique(confounder[,i])
+        factor_num <- unique(object[['confounder']][,i])
         matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
     })
 

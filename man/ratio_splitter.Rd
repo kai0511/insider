@@ -19,3 +19,6 @@ a list
 \description{
 matrix splitting via element-wise sampling without replacement
 }
+\examples{
+..
+}

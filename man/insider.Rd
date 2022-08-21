@@ -35,3 +35,6 @@ an insider object
 \description{
 create an insider object with the provided parameters
 }
+\examples{
+..
+}

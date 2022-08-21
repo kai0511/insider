@@ -73,7 +73,7 @@ obtain_indication_matrix <- function(trainset, only_positive = F){
 #' @return a list 
 #' @export
 #'
-#' @examples
+#' @examples ..
 
 ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T){
     # default ratio for test is 0.1, that is, 10% obs. will be randomly assigned to testset
