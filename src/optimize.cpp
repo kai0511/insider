@@ -143,7 +143,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, optimal_rmse, decay = 1.0; 
-    mat residual = zeros(size(data)), sub_matrix; 
+    mat residual, sub_matrix; 
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
 
@@ -167,7 +167,8 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     // check the fitting with initial values
     predict(row_factor, column_factor, predictions);
-    evaluate(data, predictions, residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+    residual = data - predictions;
+    evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
     loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
 
     while(iter < max_iter) {
@@ -175,7 +176,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         if(iter % 10 == 0){
             cout << "Iteration " << iter << " ---------------------------------" << endl;
         }
-        
+
         // update all confonding matrices
         for(i = 0; i < cfd_num; i++){
             sub_matrix = cfd_matrices(i) * column_factor;
@@ -195,12 +196,13 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
         // update columm_factor
         optimize_col(data, train_indicator, row_factor, column_factor, lambda, alpha, tuning, 30, sub_tol * decay);
+        predict(row_factor, column_factor, predictions);
+        residual = data - predictions;
 
         // check the fitting every 10 steps
         if(iter % 10 == 0){
             pre_loss = loss;
-            predict(row_factor, column_factor, predictions);
-            evaluate(data, predictions, residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+            evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
 
             cout << "Delta loss for iter " << iter << ":" << pre_loss - loss << endl;

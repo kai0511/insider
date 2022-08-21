@@ -27,11 +27,11 @@ void predict(const mat& row_factor, const mat& column_factor, mat& predictions) 
     predictions = row_factor * column_factor;
 }
 
-void evaluate(const mat& data, const mat& predictions, mat& residual, const uvec& train_idx, const uvec& test_idx, 
+void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx, 
               double& sum_residual, double& train_rmse, double& test_rmse, const int& tuning, 
               const int& iter = 0, const int& verbose = 1){
 
-    residual = data - predictions;
+    // residual = data - predictions;
     sum_residual = sum(square(residual.elem(train_idx)));
     train_rmse = std::sqrt(sum_residual/train_idx.n_elem);
 
