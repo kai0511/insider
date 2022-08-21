@@ -32,12 +32,14 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx,
               const int& iter = 0, const int& verbose = 1){
 
     // residual = data - predictions;
-    sum_residual = sum(square(residual.elem(train_idx)));
-    train_rmse = std::sqrt(sum_residual/train_idx.n_elem);
-
-    if(tuning == 1){
+    if(tuning == 0){
+        sum_residual = accu(sum(square(residual), 1));
+        train_rmse = std::sqrt(sum_residual/(residual.n_cols * residual.n_rows));
+    }else{
+        sum_residual = sum(square(residual.elem(train_idx)));
+        train_rmse = std::sqrt(sum_residual/train_idx.n_elem);
         test_rmse = std::sqrt(mean(square(residual.elem(test_idx))));
-    }  
+    } 
 
     if (verbose == 1){
         cout << "insider iter " << iter << ": train rmse = " << train_rmse << endl;
