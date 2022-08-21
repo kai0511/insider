@@ -12,8 +12,7 @@ double compute_loss(const vec& residual, const vec& beta, const double& lambda, 
 
 void predict(const mat& row_factor, const mat& column_factor, mat& predictions);
 
-void evaluate(const mat& data, const mat& predictions, mat& diff, 
-              const uvec& train_idx, const uvec& test_idx, double& sum_residual, 
+void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx, double& sum_residual, 
               double& train_rmse, double& test_rmse, const int& tuning, 
               const int& iter /* = 0*/, const int& verbose /*= 1*/);
 

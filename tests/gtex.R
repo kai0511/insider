@@ -4,6 +4,7 @@
 # For details see my note, derivartion for matrix factorization.
 # This version is a mature alpha version, and some improvement is in progess.
 #######################################################
+require(insider)
 
 num_factors <- 13
 

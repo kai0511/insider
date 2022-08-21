@@ -4,7 +4,9 @@
 # For details see my note, derivartion for matrix factorization.
 # This version is a mature alpha version, and some improvement is in progess.
 ##############################################
-# options(error = dump_and_quit())
+require(insider)
+
+# options(error = dump_and_quit)
 
 num_factors <- 32 
 
@@ -22,4 +24,7 @@ end_idx <- 2
 confounders <- dataset[ ,1:end_idx]
 confounders[, 1] <- confounders[, 1] - 1
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
+
+object <- insider(data, as.matrix(confounders))
+object <- fit(object, latent_dimension = num_factors, lambda = lambda, alpha = alpha)
  
