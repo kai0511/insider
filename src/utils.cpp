@@ -50,7 +50,7 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx,
     }
 }
 
-double compute_loss(const field<mat>&& cfd_factor, const mat& column_factor, const double& lambda, const double& alpha, 
+double compute_loss(const field<mat>& cfd_factor, const mat& column_factor, const double& lambda, const double& alpha, 
                     double& sum_residual, const int& verbose = 1){
 
     // l2 penalty 
