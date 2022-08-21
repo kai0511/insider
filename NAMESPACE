@@ -3,6 +3,5 @@
 export(dump_and_quit)
 export(fit.insider)
 export(insider)
+export(ratio_splitter)
 export(tune.insider)
-importFrom(Rcpp,evalCpp)
-useDynLib(thmc, .registration = TRUE)

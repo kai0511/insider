@@ -1,2 +1,2 @@
-#' @useDynLib thmc, .registration = TRUE
+#' @useDynLib insider, .registration = TRUE
 #' @importFrom Rcpp evalCpp
