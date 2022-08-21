@@ -201,17 +201,17 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
             cout << "Delta loss for iter " , iter, ":" << pre_loss - loss << endl;
 
-            if(pre_loss - loss)/1000 <= 1e-6){
+            if((pre_loss - loss)/1000 <= 1e-6){
                 decay = 1e-6;
-            }else if(pre_loss - loss)/1000 <= 1e-5){
+            }else if((pre_loss - loss)/1000 <= 1e-5){
                 decay = 1e-5;
-            }else if(pre_loss - loss)/1000 <= 1e-4){
+            }else if((pre_loss - loss)/1000 <= 1e-4){
                 decay = 1e-4;
-            }else if(pre_loss - loss)/1000 <= 1e-3){
+            }else if((pre_loss - loss)/1000 <= 1e-3){
                 decay = 1e-3;
-            }else if(pre_loss - loss)/1000 <= 1e-2){
+            }else if((pre_loss - loss)/1000 <= 1e-2){
                 decay = 1e-2;
-            }else if(pre_loss - loss)/1000 <= 1e-1){
+            }else if((pre_loss - loss)/1000 <= 1e-1){
                 decay = 1e-1;
             }else{
                 decay = 1.0;
