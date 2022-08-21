@@ -172,6 +172,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     while(iter < max_iter) {
 
+        cout << "Iteration " << iter << " ---------------------------------" << endl;
         // update all confonding matrices
         for(i = 0; i < cfd_num; i++){
             sub_matrix = cfd_matrices(i) * column_factor;
