@@ -1,5 +1,6 @@
 
 # dump objects for easy debugging
+#' @export
 dump_and_quit <- function() {
   # Save debugging info to file last.dump.rda
   dump.frames(to.file = TRUE)
