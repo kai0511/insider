@@ -141,8 +141,8 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, optimal_rmse, decay = 1.0; 
-    mat diff, sub_matrix; 
-    mat row_factor = zeros(data.n_rows, latent_dim), residual = zeros(size(data)), predictions = zeros(size(data));
+    mat residual = zeros(size(data)), sub_matrix; 
+    mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
 
     // check whether the number of the confounding matrices is equal to the number of confounding indicators.
@@ -165,7 +165,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     // check the fitting with initial values
     predict(row_factor, column_factor, predictions);
-    evaluate(data, predictions, diff, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+    evaluate(data, predictions, residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
     loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
 
     while(iter < max_iter) {
@@ -194,7 +194,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         if(iter % 10 == 0){
             pre_loss = loss;
             predict(row_factor, column_factor, predictions);
-            evaluate(data, predictions, diff, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+            evaluate(data, predictions, residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             loss = compute_loss(row_factor, column_factor, lambda, alpha, sum_residual, 1);
 
             decay = ((pre_loss - loss)/100 >= 1)? 1: 0;
