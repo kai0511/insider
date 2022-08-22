@@ -171,7 +171,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
     loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
 
-    while(iter < max_iter) {
+    while(iter <= max_iter) {
 
         if(iter % 10 == 0){
             cout << "Iteration " << iter << " ---------------------------------" << endl;
