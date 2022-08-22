@@ -124,7 +124,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
                                    latent_rank, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(reg_tuning)){
-                reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$optimal_rmse)
+                reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$test_rmse)
                 reg_tuning <- t(as.matrix(reg_tuning))
             }else{
                 reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$test_rmse))
