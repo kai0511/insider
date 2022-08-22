@@ -142,7 +142,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     double delta_loss;
     unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
-    double loss, pre_loss, sum_residual, train_rmse, test_rmse, optimal_rmse, decay = 1.0; 
+    double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
     mat residual, sub_matrix; 
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
@@ -223,10 +223,6 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
                 decay = 1.0;
             }
 
-            if((tuning == 1) & (optimal_rmse > test_rmse)){
-                optimal_rmse = test_rmse;
-            }
-
             if((pre_loss - loss)/pre_loss < global_tol){
                 break;
             }
@@ -241,6 +237,6 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     return List::create(Named("row_matrices") = row_matrices,
                         Named("column_factor") = column_factor, 
-                        Named("optimal_rmse") = optimal_rmse, 
+                        Named("test_rmse") = test_rmse, 
                         Named("loss") = loss);
 }
