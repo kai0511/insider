@@ -70,7 +70,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
 
         for(latent_rank in latent_dimension){
 
-            cat('Latent rank: ', latent_rank, "\n")
+            cat('Latent rank: ', latent_rank, "---------------------------------\n")
 
             # create a matrix for each covariate and put them into a List
             confounder_num <- ncol(object[['confounder']])
@@ -115,7 +115,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
         param_grid <- expand.grid(lambda = lambda, alpha = alpha)
 
         for(i in seq(nrow(param_grid))){
-            cat('parameter grid:', paste(round(param_grid[i,]), collapse = ','), "\n")
+            cat('parameter grid:', paste(round(param_grid[i,]), collapse = ','), "---------------------------------\n")
             
             lambda <- round(param_grid[i, 1], 2)
             alpha <- round(param_grid[i, 2], 2)
