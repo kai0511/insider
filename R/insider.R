@@ -85,10 +85,10 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
                     latent_rank, 1.0, 0.1, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(rank_tuning)){
-                rank_tuning <- c(latent_rank, fitted_obj$optimal_rmse)
+                rank_tuning <- c(latent_rank, fitted_obj$test_rmse)
                 rank_tuning <- t(as.matrix(rank_tuning))
             }else{
-                rank_tuning <- rbind(rank_tuning, c(latent_rank, fitted_obj$optimal_rmse))
+                rank_tuning <- rbind(rank_tuning, c(latent_rank, fitted_obj$test_rmse))
             }
             write.csv(rank_tuning, file = 'insider_rank_tuning_result.csv')
         }
@@ -127,7 +127,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
                 reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$optimal_rmse)
                 reg_tuning <- t(as.matrix(reg_tuning))
             }else{
-                reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$optimal_rmse))
+                reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$test_rmse))
             }
             write.csv(reg_tuning, file = 'insder_reg_tuning_result.csv')
         }
@@ -165,7 +165,7 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
     object[['column_factor']] <- fitted_obj[['column_factor']]
-    object[['optimal_rmse']] <- fitted_obj[['optimal_rmse']]
+    object[['test_rmse']] <- fitted_obj[['test_rmse']]
 
     return(object)
 }
