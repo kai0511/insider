@@ -115,7 +115,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
         param_grid <- expand.grid(lambda = lambda, alpha = alpha)
 
         for(i in seq(nrow(param_grid))){
-            cat('parameter grid:', paste(round(param_grid[i,]), collapse = ','), "---------------------------------\n")
+            cat('parameter grid:', paste(round(param_grid[i,], 2), collapse = ','), "---------------------------------\n")
             
             lambda <- round(param_grid[i, 1], 2)
             alpha <- round(param_grid[i, 2], 2)
