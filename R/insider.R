@@ -70,9 +70,9 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
 
         for(latent_rank in latent_dimension){
             # create a matrix for each covariate and put them into a List
-            confounder_num <- ncol(confounder)
+            confounder_num <- ncol(object[['confounder']])
             confounder_list <- lapply(1:confounder_num, function(i){
-                factor_num <- length(unique(confounder[,i]))
+                factor_num <- length(unique(object[['confounder']][,i]))
                 matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
             })
             
@@ -101,9 +101,9 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     # tune lambda and alpha with the selected latent rank
     if(length(lambda) > 1 | length(alpha) > 1){
 
-        confounder_num <- ncol(confounder)
+        confounder_num <- ncol(object[['confounder']])
         confounder_list <- lapply(1:confounder_num, function(i){
-            factor_num <- length(unique(confounder[,i]))
+            factor_num <- length(unique(object[['confounder']][,i]))
             matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
         })
     
