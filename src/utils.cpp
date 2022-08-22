@@ -45,7 +45,7 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx,
         cout << "insider iter " << iter << ": train rmse = " << train_rmse << endl;
 
         if(tuning == 1){
-            cout << "insider iter " << iter << ": train rmse = " << test_rmse << endl;
+            cout << "insider iter " << iter << ": test rmse = " << test_rmse << endl;
         }
     }
 }
