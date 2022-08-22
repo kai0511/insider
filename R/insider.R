@@ -129,7 +129,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
             }else{
                 reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$test_rmse))
             }
-            write.csv(reg_tuning, file = 'insder_reg_tuning_result.csv')
+            write.csv(reg_tuning, file = 'insider_reg_tuning_result.csv')
         }
     }
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
