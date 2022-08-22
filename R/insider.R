@@ -20,7 +20,7 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     testset <- dataset[['testset']]
 
     # generate indicator for easy operation in C++
-    train_indicator <- apply(dataset[['train_indicator']], 2, as.numeric)
+    train_indicator <- apply(dataset[['train_indicator']], 2, as.integer)
 
     # create insider class
     object <- structure(list(), class = "insider")
@@ -69,6 +69,9 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     if(length(latent_dimension) > 1){
 
         for(latent_rank in latent_dimension){
+
+            cat('Latent rank: ', latent_rank, "\n")
+
             # create a matrix for each covariate and put them into a List
             confounder_num <- ncol(object[['confounder']])
             confounder_list <- lapply(1:confounder_num, function(i){
