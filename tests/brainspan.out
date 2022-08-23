@@ -63,3 +63,50 @@ row_reg_loss:	3043.66248355;
 col_reg_loss:	3026.7805456;
 l1_reg_loss:	3850.9754456.
 Delta loss for iter 60:368.041109298
+Iteration 70 ---------------------------------
+insider iter 70: train rmse = 0.339940273891
+insider iter 70: test rmse = 0.352781973342
+total_residual	1182902.19978;
+row_reg_loss:	2912.93824295;
+col_reg_loss:	2913.88405269;
+l1_reg_loss:	3777.37433211.
+Delta loss for iter 70:331.378373035
+Iteration 80 ---------------------------------
+insider iter 80: train rmse = 0.339938742823
+insider iter 80: test rmse = 0.352777754739
+total_residual	1182891.54438;
+row_reg_loss:	2787.38178016;
+col_reg_loss:	2813.69165195;
+l1_reg_loss:	3710.56675023.
+Delta loss for iter 80:303.21184448
+Iteration 90 ---------------------------------
+insider iter 90: train rmse = 0.339937521298
+insider iter 90: test rmse = 0.352774170414
+total_residual	1182883.04327;
+row_reg_loss:	2667.75865801;
+col_reg_loss:	2723.3897426;
+l1_reg_loss:	3649.0900749.
+Delta loss for iter 90:279.902820193
+Iteration 100 ---------------------------------
+insider iter 100: train rmse = 0.33993650092
+insider iter 100: test rmse = 0.352771048106
+total_residual	1182875.94204;
+row_reg_loss:	2554.65394389;
+col_reg_loss:	2640.96115149;
+l1_reg_loss:	3591.86567225.
+Delta loss for iter 100:259.858931264
+Latent rank:  18 ---------------------------------
+insider iter 0: train rmse = 2.07709302155
+insider iter 0: test rmse = 2.07504229271
+total_residual	44162687.3361;
+row_reg_loss:	0.000353408985459;
+col_reg_loss:	0.351812590143;
+l1_reg_loss:	62.3250590891.
+Iteration 0 ---------------------------------
+insider iter 0: train rmse = 0.381192372909
+insider iter 0: test rmse = 0.395920938744
+total_residual	1487414.47777;
+row_reg_loss:	2817.97958975;
+col_reg_loss:	8854.19928715;
+l1_reg_loss:	6307.50880544.
+Delta loss for iter 0:42657355.8479
