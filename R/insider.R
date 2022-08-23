@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples ..
-insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 100, max_iter = 50000){
+insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
 
     # split data into two pieces
     dataset <- ratio_splitter(data, ratio = split_ratio)
