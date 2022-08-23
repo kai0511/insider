@@ -1,0 +1,17 @@
+Loading required package: insider
+number of all zero columns removed: 0 
+Latent rank:  17 ---------------------------------
+insider iter 0: train rmse = 2.07709300938
+insider iter 0: test rmse = 2.07504227879
+total_residual	44162686.8186;
+row_reg_loss:	0.00030965699176;
+col_reg_loss:	0.331090721085;
+l1_reg_loss:	58.7830158521.
+Iteration 0 ---------------------------------
+insider iter 0: train rmse = 0.388084072811
+insider iter 0: test rmse = 0.402085138
+total_residual	1541683.54943;
+row_reg_loss:	3553.03723732;
+col_reg_loss:	5312.78273827;
+l1_reg_loss:	5017.51132453.
+Delta loss for iter 0:42607179.0523

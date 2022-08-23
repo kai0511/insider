@@ -8,23 +8,22 @@ require(insider)
 
 # options(error = dump_and_quit)
 
-num_factors <- 32 
+num_factors <- 19 
 
 # regularization for iMF
-lambda <- 12.22  # original value 33.7777777777778
-alpha <- 0.6 # original 0.35
+lambda <- 16  # original value 33.7777777777778
+alpha <- 0.5 # original 0.35
 
-# load('~/data/zscore_matrix_selected.RData')
+setwd('../results/brainspan/')
 load('~/data/multi_dimensional_datasets/brainspan_dataset_annotated_fitered.RData')
-## load('~/data/multi_dimensional_datasets/aging_dataset_annotated_with_phenotypes_filtered.RData')
 dataset[is.na(dataset)] <- 0
-# dataset <- dataset[,-1]
-end_idx <- 2
 
+end_idx <- 2
 confounders <- dataset[ ,1:end_idx]
 confounders[, 1] <- confounders[, 1] - 1
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
 
 object <- insider(data, as.matrix(confounders))
-object <- fit(object, latent_dimension = num_factors, lambda = lambda, alpha = alpha)
+object <- tune(object, latent_dimension = as.integer(c(17, 18, 19, 20)), lambda = lambda, alpha = alpha)
+# object <- fit(object, latent_dimension = as.integer(c(17, 18, 19, 20)), lambda = lambda, alpha = alpha)
  
