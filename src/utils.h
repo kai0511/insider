@@ -1,10 +1,7 @@
 #ifndef __UTILS__
 #define __UTILS__
 
-#include <RcppArmadillo.h>
-
-using namespace arma;
-
+#include "../inst/include/insider_types.h"
 
 template <typename T>
 inline bool rows_equal(const T& lhs, const T& rhs, const double& tol /*= 1e-8*/);
