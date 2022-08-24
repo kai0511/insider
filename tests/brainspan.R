@@ -24,6 +24,6 @@ confounders[, 1] <- confounders[, 1] - 1
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
 
 object <- insider(data, as.matrix(confounders))
-object <- tune(object, latent_dimension = as.integer(c(17, 18, 19, 20)), lambda = lambda, alpha = alpha)
+object <- tune(object, latent_dimension = as.integer(19), lambda = c(10, 12, 14, 16, 18, 20, 22, 24, 26, 30), alpha = c(0.4, 0.5, 0.6, 0.7))
 # object <- fit(object, latent_dimension = as.integer(c(17, 18, 19, 20)), lambda = lambda, alpha = alpha)
  
