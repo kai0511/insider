@@ -5,6 +5,12 @@
 
 using namespace arma;
 
+
+template <typename T>
+inline bool rows_equal(const T& lhs, const T& rhs, double tol = 1e-8);
+
+mat unique_rows(const mat& m);
+
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha);
 

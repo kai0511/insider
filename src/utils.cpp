@@ -8,6 +8,20 @@
 
 using std::pow;
 
+inline bool rows_equal(const T& lhs, const T& rhs, double tol = 1e-8) {
+    return approx_equal(lhs, rhs, "absdiff", tol);
+}
+
+mat unique_rows(const mat& m) {
+    uvec flag = zeros<uvec>(m.n_rows);
+    for (uword i = 0; i < m.n_rows; i++) {
+        for (uword j = i + 1; j < m.n_rows; j++) {
+            if (rows_equal(m.row(i), m.row(j))) { flag(j) = 1; break; }
+        }
+    }
+    return m.rows(find(flag == 0));
+}
+
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha){
     vec residual = y - X * beta;
