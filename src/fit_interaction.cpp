@@ -12,7 +12,7 @@ using Rcpp::List;
 using Rcpp::Named;
 
 
-List fit_intraction(const mat& residual, const mat& train_indicator, const umat& inc_cfd_indicators,, const mat& columm_factor, 
+List fit_intraction(const mat& residual, const mat& train_indicator, const umat& inc_cfd_indicators, const mat& columm_factor, 
                     const double lambda, const double alpha, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
     /*
         fix column parameters and update row factors 
@@ -29,7 +29,7 @@ List fit_intraction(const mat& residual, const mat& train_indicator, const umat&
         for(unsigned int i = 0; i < unique_cfd.size(); i++) {
 
             uvec non_zeros; 
-            uvec cfd = unique_cfd(i);
+            uvec cfd = unique_cfd.row(i);
             uvec ids = find((inc_cfd_indicators.col(1) == cfd(1)) && (inc_cfd_indicators.col(2) == cfd(2)));
             //uvec ids = inc_cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
 
@@ -39,8 +39,8 @@ List fit_intraction(const mat& residual, const mat& train_indicator, const umat&
             mat sub_feature, features = zeros(nonzero_num, columm_factor.n_rows), XtX = zeros(columm_factor.n_rows, columm_factor.n_rows);
 
             for(unsigned int k = 0; k < ids.n_elem; k++){
-                non_zeros = find(trans(indicator.row(ids(k))));
-                end_idx = st_idx + non_zeros.n_elem - 1;
+                non_zeros = find(trans(train_indicator.row(ids(k))));
+                ed_idx = st_idx + non_zeros.n_elem - 1;
 
                 sub_feature = columm_factor.cols(non_zeros); 
                 features.rows(st_idx, end_idx) = trans(sub_feature);
@@ -66,7 +66,7 @@ List fit_intraction(const mat& residual, const mat& train_indicator, const umat&
         for(unsigned int i = 0; i < unique_cfd.size(); i++) {
 
             uvec non_zeros; 
-            uvec cfd = unique_cfd(i);
+            uvec cfd = unique_cfd.row(i);
             uvec ids = find((inc_cfd_indicators.col(1) == cfd(1)) && (inc_cfd_indicators.col(2) == cfd(2)));
             //uvec ids = inc_cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
 

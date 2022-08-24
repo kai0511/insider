@@ -13,7 +13,7 @@ inline bool rows_equal(const T& lhs, const T& rhs, double tol = 1e-8) {
     return approx_equal(lhs, rhs, "absdiff", tol);
 }
 
-mat unique_rows(const mat& m) {
+umat unique_rows(const umat& m) {
     uvec flag = zeros<uvec>(m.n_rows);
     for (uword i = 0; i < m.n_rows; i++) {
         for (uword j = i + 1; j < m.n_rows; j++) {
