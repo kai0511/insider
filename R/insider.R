@@ -20,15 +20,12 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     testset <- dataset[['testset']]
 
     # generate indicator for easy operation in C++
-    train_indicator <- apply(dataset[['train_indicator']], 2, as.integer)
+    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
 
     # create insider class
     object <- structure(list(), class = "insider")
     object[['data']] <- data
     object[['confounder']] <- confounder
-    object[['trainset']] <- trainset
-    object[['testset']] <- testset
-    object[['train_indicator']] <- train_indicator
 
     params <- list(global_tol = global_tol, sub_tol = sub_tol,
                    tuning_iter = tuning_iter, max_iter = max_iter)
@@ -170,7 +167,51 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     return(object)
 }
 
-
 #' @export 
+capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha){
+    
+    confounder_num <- ncol(object[['confounder']])
+    residual <- object[['data']]
+
+    for(i in 1:confounder_num){
+        sub_predictions <- object[['cfd_matrices']][[i]] %*% column_factor
+        residual <- residual - sub_predictions[object[['confounder']][,i], ]
+    }
+
+    confounder <- object[['confounder']][, inc_cfd]
+    unique_cfd <- unique(confounder)
+
+    param_grid <- expand.grid(lambda = lambda, alpha = alpha)
+
+    for(i in seq(nrow(param_grid))){
+
+        cat('parameter grid:', paste(round(param_grid[i,], 2), collapse = ','), "---------------------------------\n")
+            
+        lambda <- round(param_grid[i, 1], 2)
+        alpha <- round(param_grid[i, 2], 2)
+
+        row_interaction <- matrix(0, nrow = nrow(unique_cfd), ncol = latent_dimension)
+
+        interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['columm_factor']], unique_cfd, lambda, alpha, 1)
+
+        for(k in 1:nrow(unique_cfd)){
+            selected <- apply(confounder, 1, function(x) x == unique_cfd(k))
+            row_interaction[selected, ] <- interactions[k, ]
+        }
+
+        predictions <- row_interaction %*% object[['columm_factor']]
+        diff <- residual - predictions
+
+        train_rmse <- sqrt(mean(diff[object[['train_indicator']] == 1]^2))
+        test_rmse <- sqrt(mean(diff[object[['train_indicator']] == 0]^2))
+    }
+    
+
+
+
+
+
+
+}
 
 
