@@ -8,6 +8,7 @@
 
 using std::pow;
 
+template <typename T>
 inline bool rows_equal(const T& lhs, const T& rhs, double tol = 1e-8) {
     return approx_equal(lhs, rhs, "absdiff", tol);
 }
