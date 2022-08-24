@@ -12,15 +12,14 @@ using Rcpp::List;
 using Rcpp::Named;
 
 
-List fit_intraction(const mat& residual, const mat& train_indicator, const umat& inc_cfd_indicators, const mat& columm_factor, 
-                    const double lambda, const double alpha, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
+mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& columm_factor, const umat& unique_cfd,
+                   const double lambda, const double alpha, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
     /*
         fix column parameters and update row factors 
     args:
         @dimension must be in (1, 2), denoting which row_factor will be updated
         @n_cores number of cores for parallel computation
     */
-    umat unique_cfd = unique_rows(inc_cfd_indicators);
     mat interactions = zeros(unique_cfd.n_rows, columm_factor.n_rows);
 
     if(tuning == 1){
@@ -91,8 +90,6 @@ List fit_intraction(const mat& residual, const mat& train_indicator, const umat&
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
     }
-
-    return List::create(Named("unique_cfd") = unique_cfd,
-                        Named("interactions") = interactions);
+    return interactions;
     
 }

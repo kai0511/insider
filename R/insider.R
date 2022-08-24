@@ -171,3 +171,6 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
 }
 
 
+#' @export 
+
+
