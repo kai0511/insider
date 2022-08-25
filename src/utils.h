@@ -8,6 +8,8 @@ inline bool rows_equal(const T& lhs, const T& rhs, const double& tol /*= 1e-8*/)
 
 umat unique_rows(const umat& m);
 
+uvec find_equal_rows(const mat& m, const rowvec& v);
+
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha);
 

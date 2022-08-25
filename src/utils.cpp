@@ -23,6 +23,18 @@ umat unique_rows(const umat& m) {
     return m.rows(find(flag == 0));
 }
 
+uvec find_equal_rows(const mat& m, const rowvec& v){
+    indices = zeros<uvec>(cfd_indicators.n_rows);
+
+    for (uword i = 0; i < m.n_rows; i++) {
+        if (rows_equal(m.row(i), v)) {
+            indices(i) = 1; 
+        }
+    }
+    return find(indices);
+}
+
+
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha){
     vec residual = y - X * beta;
