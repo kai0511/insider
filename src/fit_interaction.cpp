@@ -25,7 +25,7 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
     if(tuning == 1){
         
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(unsigned int i = 0; i < unique_cfd.size(); i++) {
+        for(unsigned int i = 0; i < unique_cfd.n_rows; i++) {
 
             uvec non_zeros; 
             uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
@@ -60,7 +60,7 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
         mat Xtys = column_factor * trans(residual);
 
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(unsigned int i = 0; i < unique_cfd.size(); i++) {
+        for(unsigned int i = 0; i < unique_cfd.n_rows; i++) {
 
             uvec non_zeros; 
             uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
