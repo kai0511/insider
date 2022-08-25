@@ -168,9 +168,14 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
 }
 
 #' @export 
-capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha){
+capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha, ratio = 0.2){
     
     tuning <- ifelse((length(lambda) > 1) | (length(alpha) > 1), 1, 0)
+
+    if(tuning == 1){
+        dataset <- ratio_splitter(data, ratio = ratio)
+        object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
+    }
     
     confounder_num <- ncol(object[['confounder']])
     residual <- object[['data']]
@@ -194,12 +199,12 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
             lambda <- round(param_grid[i, 1], 2)
             alpha <- round(param_grid[i, 2], 2)
 
-            row_interaction <- matrix(0, nrow = nrow(unique_cfd), ncol = latent_dimension)
+            row_interaction <- matrix(0, nrow = nrow(confounder), ncol = latent_dimension)
 
             interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
             for(k in 1:nrow(unique_cfd)){
-                selected <- apply(confounder, 1, function(x) x == unique_cfd(k))
+                selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
                 row_interaction[selected, ] <- interactions[k, ]
             }
 
@@ -209,21 +214,26 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
             train_rmse <- sqrt(mean(diff[object[['train_indicator']] == 1]^2))
             test_rmse <- sqrt(mean(diff[object[['train_indicator']] == 0]^2))
 
+            cat('train_rmse:', train_rmse, ", test_rmse:", test_rmse, '\n')
+
             if(is.null(rmse)){
-                rmse <- c(round(param_grid[i, ], 2), train_rmse, test_rmse)
+                rmse <- c(lambda, alpha, train_rmse, test_rmse)
                 rmse <- t(as.matrix(rmse))
             }else{
-                rmse <- rbind(rmse, c(round(param_grid[i,], 2), train_rmse, test_rmse))
+                rmse <- rbind(rmse, c(lambda, alpha, train_rmse, test_rmse))
             }
             write.csv(rmse, file = 'insider_interaction_tuning_result.csv')
         }
-        
+        rmse <- as.data.frame(rmse)
         colnames(rmse) <- c('lambda', 'alpha', 'train_rmse', 'test_rmse')
-        min_idx <- which.min(rmse$test_rmse)
-        lambda <- rmse$lambda[min_idx]
-        alpha <- rmse$alpha[min_idx]
-        tuning = 0
     }
+
+    min_idx <- which.min(rmse[['test_rmse']])
+    lambda <- rmse[['lambda']][min_idx]
+    alpha <- rmse[['alpha']][min_idx]
+    tuning <- 0
+
+    cat('lambda: ', lambda, '; alpha: ', alpha, '\n')
 
     interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
