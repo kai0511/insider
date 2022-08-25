@@ -176,7 +176,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
     residual <- object[['data']]
 
     for(i in 1:confounder_num){
-        sub_predictions <- object[['cfd_matrices']][[i]] %*% column_factor
+        sub_predictions <- object[['cfd_matrices']][[i]] %*% object[['column_factor']]
         residual <- residual - sub_predictions[object[['confounder']][,i], ]
     }
 
