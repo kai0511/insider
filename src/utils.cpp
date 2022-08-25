@@ -23,7 +23,7 @@ umat unique_rows(const umat& m) {
     return m.rows(find(flag == 0));
 }
 
-uvec find_equal_rows(const mat& m, const rowvec& v){
+uvec find_equal_rows(const umat& m, const subview_row<unsigned int>& v){
     uvec indices = zeros<uvec>(m.n_rows);
 
     for (uword i = 0; i < m.n_rows; i++) {

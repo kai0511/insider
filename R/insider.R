@@ -196,7 +196,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
 
             row_interaction <- matrix(0, nrow = nrow(unique_cfd), ncol = latent_dimension)
 
-            interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
+            interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
             for(k in 1:nrow(unique_cfd)){
                 selected <- apply(confounder, 1, function(x) x == unique_cfd(k))
@@ -225,7 +225,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
         tuning = 0
     }
 
-    interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
+    interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
     object[['interactions']] <- interactions
     return(object)

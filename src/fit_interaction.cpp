@@ -12,7 +12,7 @@ using Rcpp::List;
 using Rcpp::Named;
 
 // [[Rcpp::export]]
-mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& column_factor, const umat& unique_cfd,
+mat fit_interaction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& column_factor, const umat& unique_cfd,
                    const double lambda, const double alpha, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
     /*
         fix column parameters and update row factors 

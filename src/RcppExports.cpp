@@ -66,9 +66,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// fit_intraction
-mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& column_factor, const umat& unique_cfd, const double lambda, const double alpha, const int tuning, const double& tol, const int n_cores);
-RcppExport SEXP _insider_fit_intraction(SEXP residualSEXP, SEXP train_indicatorSEXP, SEXP cfd_indicatorsSEXP, SEXP column_factorSEXP, SEXP unique_cfdSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP tolSEXP, SEXP n_coresSEXP) {
+// fit_interaction
+mat fit_interaction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& column_factor, const umat& unique_cfd, const double lambda, const double alpha, const int tuning, const double& tol, const int n_cores);
+RcppExport SEXP _insider_fit_interaction(SEXP residualSEXP, SEXP train_indicatorSEXP, SEXP cfd_indicatorsSEXP, SEXP column_factorSEXP, SEXP unique_cfdSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP tolSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,7 +82,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type tuning(tuningSEXP);
     Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_intraction(residual, train_indicator, cfd_indicators, column_factor, unique_cfd, lambda, alpha, tuning, tol, n_cores));
+    rcpp_result_gen = Rcpp::wrap(fit_interaction(residual, train_indicator, cfd_indicators, column_factor, unique_cfd, lambda, alpha, tuning, tol, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -132,7 +132,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_insider_coordinate_descent", (DL_FUNC) &_insider_coordinate_descent, 8},
     {"_insider_strong_coordinate_descent", (DL_FUNC) &_insider_strong_coordinate_descent, 8},
     {"_insider_strong_feature_sign", (DL_FUNC) &_insider_strong_feature_sign, 8},
-    {"_insider_fit_intraction", (DL_FUNC) &_insider_fit_intraction, 10},
+    {"_insider_fit_interaction", (DL_FUNC) &_insider_fit_interaction, 10},
     {"_insider_optimize", (DL_FUNC) &_insider_optimize, 12},
     {"_insider_proximal_gradient", (DL_FUNC) &_insider_proximal_gradient, 9},
     {NULL, NULL, 0}
