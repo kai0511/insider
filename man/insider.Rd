@@ -10,7 +10,7 @@ insider(
   split_ratio = 0.1,
   global_tol = 1e-09,
   sub_tol = 1e-05,
-  tuning_iter = 100,
+  tuning_iter = 30,
   max_iter = 50000
 )
 }

@@ -196,14 +196,14 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
 
             row_interaction <- matrix(0, nrow = nrow(unique_cfd), ncol = latent_dimension)
 
-            interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['columm_factor']], unique_cfd, lambda, alpha, tuning)
+            interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
             for(k in 1:nrow(unique_cfd)){
                 selected <- apply(confounder, 1, function(x) x == unique_cfd(k))
                 row_interaction[selected, ] <- interactions[k, ]
             }
 
-            predictions <- row_interaction %*% object[['columm_factor']]
+            predictions <- row_interaction %*% object[['column_factor']]
             diff <- residual - predictions
 
             train_rmse <- sqrt(mean(diff[object[['train_indicator']] == 1]^2))
@@ -225,7 +225,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
         tuning = 0
     }
 
-    interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['columm_factor']], unique_cfd, lambda, alpha, tuning)
+    interactions <- fit_intraction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
 
     object[['interactions']] <- interactions
     return(object)
