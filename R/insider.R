@@ -173,7 +173,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
     tuning <- ifelse((length(lambda) > 1) | (length(alpha) > 1), 1, 0)
 
     if(tuning == 1){
-        dataset <- ratio_splitter(data, ratio = ratio)
+        dataset <- ratio_splitter(object[['data']], ratio = ratio)
         object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
     }
     
