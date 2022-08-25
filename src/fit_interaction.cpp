@@ -28,9 +28,7 @@ mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& 
         for(unsigned int i = 0; i < unique_cfd.size(); i++) {
 
             uvec non_zeros; 
-            uvec cfd = unique_cfd.row(i);
-            uvec ids = find((cfd_indicators.col(1) == cfd(1)) && (cfd_indicators.col(2) == cfd(2)));
-            //uvec ids = cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
+            uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
 
             vec wstart = zeros<vec>(column_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = accu(train_indicator.rows(ids));
@@ -65,9 +63,7 @@ mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& 
         for(unsigned int i = 0; i < unique_cfd.size(); i++) {
 
             uvec non_zeros; 
-            uvec cfd = unique_cfd.row(i);
-            uvec ids = find((cfd_indicators.col(1) == cfd(1)) && (cfd_indicators.col(2) == cfd(2)));
-            //uvec ids = cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
+            uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
 
             vec wstart = zeros<vec>(column_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = ids.n_elem * column_factor.n_cols;
