@@ -24,7 +24,7 @@ umat unique_rows(const umat& m) {
 }
 
 uvec find_equal_rows(const mat& m, const rowvec& v){
-    indices = zeros<uvec>(cfd_indicators.n_rows);
+    uvec indices = zeros<uvec>(m.n_rows);
 
     for (uword i = 0; i < m.n_rows; i++) {
         if (rows_equal(m.row(i), v)) {
