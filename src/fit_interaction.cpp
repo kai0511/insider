@@ -12,7 +12,7 @@ using Rcpp::List;
 using Rcpp::Named;
 
 // [[Rcpp::export]]
-mat fit_interaction(const mat& residual, const mat& train_indicator, const umat& cfd_indicators, const mat& column_factor, const umat& unique_cfd,
+mat fit_interaction(const mat& residual, const mat& train_indicator, const uvec& interaction_indicator, const mat& column_factor, 
                    const double lambda, const double alpha, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
     /*
         fix column parameters and update row factors 
@@ -20,15 +20,16 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
         @dimension must be in (1, 2), denoting which row_factor will be updated
         @n_cores number of cores for parallel computation
     */
-    mat interactions = zeros(unique_cfd.n_rows, column_factor.n_rows);
+    uvec unique_ita = unique(interaction_indicator);
+    mat interactions = zeros(unique_ita.n_elem, column_factor.n_rows);
 
     if(tuning == 1){
         
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(unsigned int i = 0; i < unique_cfd.n_rows; i++) {
+        for(unsigned int i = 0; i < unique_ita.n_elem; i++) {
 
             uvec non_zeros; 
-            uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
+            uvec ids = find(interaction_indicator == unique_ita(i));
 
             vec wstart = zeros<vec>(column_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = accu(train_indicator.rows(ids));
@@ -60,10 +61,10 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
         mat Xtys = column_factor * trans(residual);
 
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
-        for(unsigned int i = 0; i < unique_cfd.n_rows; i++) {
+        for(unsigned int i = 0; i < unique_ita.n_elem; i++) {
 
             uvec non_zeros; 
-            uvec ids = find_equal_rows(cfd_indicators, unique_cfd.row(i));
+            uvec ids = find(interaction_indicator == unique_ita(i));
 
             vec wstart = zeros<vec>(column_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = ids.n_elem * column_factor.n_cols;

@@ -188,6 +188,13 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
     confounder <- object[['confounder']][, inc_cfd]
     unique_cfd <- unique(confounder)
 
+    interaction_indicator <- rep(0, nrow(confounder))
+    for(k in 1:nrow(unique_cfd)){
+        selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
+        interaction_indicator[selected] <- k
+    }
+
+
     rmse <- NULL
     param_grid <- expand.grid(lambda = lambda, alpha = alpha)
 
@@ -201,15 +208,10 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
 
             row_interaction <- matrix(0, nrow = nrow(confounder), ncol = latent_dimension)
 
-            interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
+            interactions <- fit_interaction(residual, object[['train_indicator']], interaction_indicator, object[['column_factor']], lambda, alpha, tuning)
 
-            for(k in 1:nrow(unique_cfd)){
-                selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
-                row_interaction[selected, ] <- interactions[k, ]
-            }
-
-            predictions <- row_interaction %*% object[['column_factor']]
-            diff <- residual - predictions
+            predictions <- interactions %*% object[['column_factor']]
+            diff <- residual - predictions[indicator,]
 
             train_rmse <- sqrt(mean(diff[object[['train_indicator']] == 1]^2))
             test_rmse <- sqrt(mean(diff[object[['train_indicator']] == 0]^2))
@@ -235,7 +237,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
 
     cat('lambda: ', lambda, '; alpha: ', alpha, '\n')
 
-    interactions <- fit_interaction(residual, object[['train_indicator']], confounder, object[['column_factor']], unique_cfd, lambda, alpha, tuning)
+    interactions <- fit_interaction(residual, object[['train_indicator']], interaction_indicator, object[['column_factor']], lambda, alpha, tuning)
 
     object[['interactions']] <- interactions
     return(object)
