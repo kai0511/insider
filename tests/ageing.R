@@ -7,15 +7,15 @@
 
 require(insider)
 
-options(error = dump_and_quit())
+# options(error = dump_and_quit())
 
-num_factors <- 23
+num_factors <- 26
 
 # regularization for iMF
-lambda <- 7
+lambda <- 15
 alpha <- 0.2
 
-# setwd("~/data/multi_dimensional_datasets/result/ageing/")
+setwd("../results/ageing")
 load('~/data/multi_dimensional_datasets/ageing_dataset_annotated_with_phenotypes_filtered.RData')
 
 dataset[is.na(dataset)] <- 0
@@ -23,6 +23,9 @@ dataset <- dataset[,-1]
 
 end_idx <- 3
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
-confounders <- dataset[ ,1:end_idx]
+confounders <- as.matrix(dataset[ ,1:end_idx])
 
-
+object <- insider(data, as.matrix(confounders), global_tol = 1e-10, tuning_iter = 30)
+# object <- tune(object, as.integer(num_factors), lambda = c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50), alpha = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+object <- fit(object, as.integer(num_factors), lambda = lambda, alpha = alpha)
+save(object, file = "insider_ageing_fitted_object.RData")

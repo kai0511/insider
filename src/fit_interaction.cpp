@@ -29,8 +29,8 @@ mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& 
 
             uvec non_zeros; 
             uvec cfd = unique_cfd.row(i);
-            uvec ids = find((inc_cfd_indicators.col(1) == cfd(1)) && (inc_cfd_indicators.col(2) == cfd(2)));
-            //uvec ids = inc_cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
+            uvec ids = find((cfd_indicators.col(1) == cfd(1)) && (cfd_indicators.col(2) == cfd(2)));
+            //uvec ids = cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
 
             vec wstart = zeros<vec>(columm_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = accu(train_indicator.rows(ids));
@@ -42,16 +42,16 @@ mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& 
                 ed_idx = st_idx + non_zeros.n_elem - 1;
 
                 sub_feature = columm_factor.cols(non_zeros); 
-                features.rows(st_idx, end_idx) = trans(sub_feature);
+                features.rows(st_idx, ed_idx) = trans(sub_feature);
 
                 sub_outcome = trans(residual.row(ids(k)));
                 sub_outcome = sub_outcome(non_zeros);
-                outcomes.subvec(st_idx, end_idx) = sub_outcome;
+                outcomes.subvec(st_idx, ed_idx) = sub_outcome;
 
-                XtX += sub_feature * features.rows(st_idx, end_idx);
+                XtX += sub_feature * features.rows(st_idx, ed_idx);
                 Xty += sub_feature * sub_outcome;
 
-                st_idx = end_idx + 1;
+                st_idx = ed_idx + 1;
             }
             interactions.row(i) = strong_coordinate_descent(features, outcomes, wstart, lambda, alpha, XtX, Xty, tol);
         }
@@ -66,8 +66,8 @@ mat fit_intraction(const mat& residual, const mat& train_indicator, const umat& 
 
             uvec non_zeros; 
             uvec cfd = unique_cfd.row(i);
-            uvec ids = find((inc_cfd_indicators.col(1) == cfd(1)) && (inc_cfd_indicators.col(2) == cfd(2)));
-            //uvec ids = inc_cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
+            uvec ids = find((cfd_indicators.col(1) == cfd(1)) && (cfd_indicators.col(2) == cfd(2)));
+            //uvec ids = cfd_indicators.each_row( [](const rowvec& a){ return approx_equal(a, cfd, "absdiff", 1e-8)? 1 : 0; }); 
 
             vec wstart = zeros<vec>(columm_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = ids.n_elem * columm_factor.n_cols;
