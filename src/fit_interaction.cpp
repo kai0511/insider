@@ -51,7 +51,7 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
 
                 st_idx = ed_idx + 1;
             }
-            interactions.row(i) = strong_coordinate_descent(features, outcomes, wstart, lambda, alpha, XtX, Xty, tol);
+            interactions.row(i) = trans(strong_coordinate_descent(features, outcomes, wstart, lambda, alpha, XtX, Xty, tol));
         }
 
     }else if(tuning == 0){
@@ -79,7 +79,7 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const umat&
                 XtX += gram;
                 Xty += Xtys.col(ids(k));
             }
-            interactions.row(i) = strong_coordinate_descent(features, outcomes, wstart, lambda, alpha, XtX, Xty, tol);
+            interactions.row(i) = trans(strong_coordinate_descent(features, outcomes, wstart, lambda, alpha, XtX, Xty, tol));
         }
 
     }else{
