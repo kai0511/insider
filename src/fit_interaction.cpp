@@ -63,13 +63,12 @@ mat fit_interaction(const mat& residual, const mat& train_indicator, const uvec&
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
         for(unsigned int i = 0; i < unique_ita.n_elem; i++) {
 
-            uvec non_zeros; 
             uvec ids = find(interaction_indicator == unique_ita(i));
-
+            
             vec wstart = zeros<vec>(column_factor.n_rows);
             int st_idx = 0, ed_idx, nonzero_num = ids.n_elem * column_factor.n_cols;
-            vec sub_outcome, outcomes = zeros(nonzero_num), Xty = zeros<vec>(column_factor.n_rows);
-            mat sub_feature, features = zeros(nonzero_num, column_factor.n_rows), XtX = zeros(column_factor.n_rows, column_factor.n_rows);
+            vec outcomes = zeros(nonzero_num), Xty = zeros<vec>(column_factor.n_rows);
+            mat features = zeros(nonzero_num, column_factor.n_rows), XtX = zeros(column_factor.n_rows, column_factor.n_rows);
 
             for(unsigned int k = 0; k < ids.n_elem; k++){
                 ed_idx = st_idx + column_factor.n_cols - 1;
