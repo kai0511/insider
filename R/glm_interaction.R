@@ -1,5 +1,5 @@
 #' @export
-glm_interaction <- function(residual, train_indicator interaction_indicator, column_factor, tol = 1e-10, n_cores =10){
+glm_interaction <- function(residual, train_indicator, interaction_indicator, column_factor, tol = 1e-10, n_cores =10){
 
     unique_ita <- unique(interaction_indicator)
     coeff_matrix <- matrix(0, nrow = length(unique_ita), ncol = nrow(column_factor))
