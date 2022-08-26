@@ -211,7 +211,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
             interactions <- fit_interaction(residual, object[['train_indicator']], interaction_indicator, object[['column_factor']], lambda, alpha, tuning)
 
             predictions <- interactions %*% object[['column_factor']]
-            diff <- residual - predictions[indicator,]
+            diff <- residual - predictions[interaction_indicator,]
 
             train_rmse <- sqrt(mean(diff[object[['train_indicator']] == 1]^2))
             test_rmse <- sqrt(mean(diff[object[['train_indicator']] == 0]^2))
@@ -228,12 +228,12 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
         }
         rmse <- as.data.frame(rmse)
         colnames(rmse) <- c('lambda', 'alpha', 'train_rmse', 'test_rmse')
+        
+	min_idx <- which.min(rmse[['test_rmse']])
+        lambda <- rmse[['lambda']][min_idx]
+        alpha <- rmse[['alpha']][min_idx]
+        tuning <- 0
     }
-
-    min_idx <- which.min(rmse[['test_rmse']])
-    lambda <- rmse[['lambda']][min_idx]
-    alpha <- rmse[['alpha']][min_idx]
-    tuning <- 0
 
     cat('lambda: ', lambda, '; alpha: ', alpha, '\n')
 

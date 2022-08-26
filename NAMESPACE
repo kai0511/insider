@@ -3,6 +3,7 @@
 export(capture_interaction)
 export(dump_and_quit)
 export(fit)
+export(glm_interaction)
 export(insider)
 export(ratio_splitter)
 export(tune)
