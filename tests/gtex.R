@@ -12,10 +12,19 @@ num_factors <- 13
 lambda <- 44.56  # original value 33.7777777777778
 alpha <- 0.4 # original 0.35
 
-load("/home/kai/data/multi_dimensional_datasets/gtex_brain_sampled_expression_including_phenotype.RData")
+
+setwd('../results/gtex/')
+
+load("~/data/multi_dimensional_datasets/gtex_brain_sampled_expression_including_phenotype.RData")
 
 # dataset <- as.matrix(dataset)
 # dataset[is.na(dataset)] <- 0
 data <- log2(as.matrix(dataset[,-c(1,2,3)]) + 1)
 confounders <- as.matrix(dataset[,2:3])
 colnames(confounders) <- c('gender', 'structure')
+
+
+object <- insider(data, as.matrix(confounders), global_tol = 1e-10)
+object <- tune(object, latent_dimension = as.integer(seq(10, 20, by = 1)), lambda = 1, alpha = 0.1) 
+# object <- fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha)
+save(object, file = "insider_brainspan_fitted_object.RData")

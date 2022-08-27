@@ -3,7 +3,7 @@
 #' @param data the whole data for insider, including trainset and testset
 #' @param confounder a matrix with each column indicating the belonging for each covariate
 #' @param split_ratio a proportion of elements from data considered as testset
-#' @param global_tol the global convergence creteria
+#' @param global_tol the global convergence criteria
 #' @param sub_tol  the convergence creteria for each elastic net problem
 #' @param tuning_iter number of steps will run in tuning
 #' @param max_iter maxiumme number of steps will run in fitting insider
@@ -19,13 +19,13 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     trainset <- dataset[['trainset']]
     testset <- dataset[['testset']]
 
-    # generate indicator for easy operation in C++
-    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
-
     # create insider class
     object <- structure(list(), class = "insider")
     object[['data']] <- data
     object[['confounder']] <- confounder
+
+    # generate indicator for easy operation in C++
+    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
 
     params <- list(global_tol = global_tol, sub_tol = sub_tol,
                    tuning_iter = tuning_iter, max_iter = max_iter)
