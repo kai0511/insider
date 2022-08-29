@@ -13,10 +13,6 @@ strong_feature_sign <- function(X, y, wstart, lambda, alpha, XtX, Xty, max_iter 
     .Call(`_insider_strong_feature_sign`, X, y, wstart, lambda, alpha, XtX, Xty, max_iter)
 }
 
-fit_interaction <- function(residual, train_indicator, interaction_indicator, column_factor, lambda, alpha, tuning, tol = 1e-10, n_cores = 10L) {
-    .Call(`_insider_fit_interaction`, residual, train_indicator, interaction_indicator, column_factor, lambda, alpha, tuning, tol, n_cores)
-}
-
 optimize <- function(data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda = 1.0, alpha = 0.1, tuning = 1L, global_tol = 1e-10, sub_tol = 1e-5, max_iter = 10000L) {
     .Call(`_insider_optimize`, data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, global_tol, sub_tol, max_iter)
 }

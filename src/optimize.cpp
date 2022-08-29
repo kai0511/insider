@@ -205,20 +205,21 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             pre_loss = loss;
             evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
+            
+	    delta_loss = pre_loss - loss;
+            cout << "Delta loss for iter " << iter << ":" << delta_loss << endl;
 
-            cout << "Delta loss for iter " << iter << ":" << pre_loss - loss << endl;
-
-            if((pre_loss - loss)/1000 <= 1e-6){
+            if(delta_loss/1000 <= 1e-6){
                 decay = 1e-6;
-            }else if((pre_loss - loss)/1000 <= 1e-5){
+            }else if(delta_loss/1000 <= 1e-5){
                 decay = 1e-5;
-            }else if((pre_loss - loss)/1000 <= 1e-4){
+            }else if(delta_loss/1000 <= 1e-4){
                 decay = 1e-4;
-            }else if((pre_loss - loss)/1000 <= 1e-3){
+            }else if(delta_loss/1000 <= 1e-3){
                 decay = 1e-3;
-            }else if((pre_loss - loss)/1000 <= 1e-2){
+            }else if(delta_loss/1000 <= 1e-2){
                 decay = 1e-2;
-            }else if((pre_loss - loss)/1000 <= 1e-1){
+            }else if(delta_loss/1000 <= 1e-1){
                 decay = 1e-1;
             }else{
                 decay = 1.0;

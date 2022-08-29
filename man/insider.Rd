@@ -7,6 +7,7 @@
 insider(
   data,
   confounder,
+  interaction_idx,
   split_ratio = 0.1,
   global_tol = 1e-09,
   sub_tol = 1e-05,
@@ -21,7 +22,7 @@ insider(
 
 \item{split_ratio}{a proportion of elements from data considered as testset}
 
-\item{global_tol}{the global convergence creteria}
+\item{global_tol}{the global convergence criteria}
 
 \item{sub_tol}{the convergence creteria for each elastic net problem}
 

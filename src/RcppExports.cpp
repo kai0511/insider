@@ -66,25 +66,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// fit_interaction
-mat fit_interaction(const mat& residual, const mat& train_indicator, const uvec& interaction_indicator, const mat& column_factor, const double lambda, const double alpha, const int tuning, const double& tol, const int n_cores);
-RcppExport SEXP _insider_fit_interaction(SEXP residualSEXP, SEXP train_indicatorSEXP, SEXP interaction_indicatorSEXP, SEXP column_factorSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP tolSEXP, SEXP n_coresSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const mat& >::type residual(residualSEXP);
-    Rcpp::traits::input_parameter< const mat& >::type train_indicator(train_indicatorSEXP);
-    Rcpp::traits::input_parameter< const uvec& >::type interaction_indicator(interaction_indicatorSEXP);
-    Rcpp::traits::input_parameter< const mat& >::type column_factor(column_factorSEXP);
-    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const int >::type tuning(tuningSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_interaction(residual, train_indicator, interaction_indicator, column_factor, lambda, alpha, tuning, tol, n_cores));
-    return rcpp_result_gen;
-END_RCPP
-}
 // optimize
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const int latent_dim, const double lambda, const double alpha, const int tuning, const double global_tol, const double sub_tol, const unsigned int max_iter);
 RcppExport SEXP _insider_optimize(SEXP dataSEXP, SEXP cfd_factorsSEXP, SEXP column_factorSEXP, SEXP cfd_indicatorsSEXP, SEXP train_indicatorSEXP, SEXP latent_dimSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP global_tolSEXP, SEXP sub_tolSEXP, SEXP max_iterSEXP) {
@@ -131,7 +112,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_insider_coordinate_descent", (DL_FUNC) &_insider_coordinate_descent, 8},
     {"_insider_strong_coordinate_descent", (DL_FUNC) &_insider_strong_coordinate_descent, 8},
     {"_insider_strong_feature_sign", (DL_FUNC) &_insider_strong_feature_sign, 8},
-    {"_insider_fit_interaction", (DL_FUNC) &_insider_fit_interaction, 9},
     {"_insider_optimize", (DL_FUNC) &_insider_optimize, 12},
     {"_insider_proximal_gradient", (DL_FUNC) &_insider_proximal_gradient, 9},
     {NULL, NULL, 0}
