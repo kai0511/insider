@@ -206,7 +206,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
             
-	        delta_loss = pre_loss - loss;
+            delta_loss = pre_loss - loss;
             cout << "Delta loss for iter " << iter << ":" << delta_loss << endl;
 
             if(delta_loss/1000 <= 1e-6){
