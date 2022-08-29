@@ -36,6 +36,8 @@ insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global
             selected <- apply(confounder[, interaction_idx], 1, function(x) all(x == unique_cfd[k,]))
             interaction_indicator[selected] <- k
         }
+    }else{
+        stop("The interaction_idx should be integers and its length must be greater than or equal to 2!")
     }
     
     object[['confounder']] <- cbind(confounder, interaction_indicator)
