@@ -3,7 +3,7 @@
 #' @param data the whole data for insider, including trainset and testset
 #' @param confounder a matrix with each column indicating the belonging for each covariate
 #' @param split_ratio a proportion of elements from data considered as testset
-#' @param global_tol the global convergence creteria
+#' @param global_tol the global convergence criteria
 #' @param sub_tol  the convergence creteria for each elastic net problem
 #' @param tuning_iter number of steps will run in tuning
 #' @param max_iter maxiumme number of steps will run in fitting insider
@@ -18,9 +18,6 @@ insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global
     dataset <- ratio_splitter(data, ratio = split_ratio)
     trainset <- dataset[['trainset']]
     testset <- dataset[['testset']]
-
-    # generate indicator for easy operation in C++
-    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
 
     # create insider class
     object <- structure(list(), class = "insider")
@@ -42,6 +39,9 @@ insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global
     }
     
     object[['confounder']] <- cbind(confounder, interaction_indicator)
+
+    # generate indicator for easy operation in C++
+    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
 
     params <- list(global_tol = global_tol, sub_tol = sub_tol,
                    tuning_iter = tuning_iter, max_iter = max_iter)
@@ -98,10 +98,10 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
                     latent_rank, 1.0, 0.1, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(rank_tuning)){
-                rank_tuning <- c(latent_rank, fitted_obj$test_rmse)
+                rank_tuning <- c(latent_rank, fitted_obj$train_rmse, fitted_obj$test_rmse)
                 rank_tuning <- t(as.matrix(rank_tuning))
             }else{
-                rank_tuning <- rbind(rank_tuning, c(latent_rank, fitted_obj$test_rmse))
+                rank_tuning <- rbind(rank_tuning, c(latent_rank, fitted_obj$train_rmse, fitted_obj$test_rmse))
             }
             write.csv(rank_tuning, file = 'insider_rank_tuning_result.csv')
         }
@@ -137,12 +137,12 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
                                    latent_rank, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(reg_tuning)){
-                reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$test_rmse)
+                reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$train_rmse, fitted_obj$test_rmse)
                 reg_tuning <- t(as.matrix(reg_tuning))
             }else{
-                reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$test_rmse))
+                reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$train_rmse, fitted_obj$test_rmse))
             }
-            write.csv(reg_tuning, file = 'insider_reg_tuning_result.csv')
+            write.csv(reg_tuning, file = 'insider_R', latent_rank, '_reg_tuning_result.csv')
         }
     }
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
