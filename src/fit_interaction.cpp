@@ -7,7 +7,7 @@
 #include <iostream>
 #include <omp.h>
 
-void fit_interaction(const mat& residual, const mat& train_indicator, const mat& interactions, const uvec& interaction_indicator, const mat& column_factor, 
+void fit_interaction(const mat& residual, const mat& train_indicator, mat& interactions, const uvec& interaction_indicator, const mat& column_factor, 
                      const double lambda, const int tuning, const double& tol = 1e-10, const int n_cores = 10){
     /*
         fix column parameters and update row factors 
