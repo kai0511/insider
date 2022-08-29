@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples ..
-insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
+insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
 
     # split data into two pieces
     dataset <- ratio_splitter(data, ratio = split_ratio)
@@ -25,7 +25,23 @@ insider <- function(data, confounder, split_ratio = 0.1, global_tol = 1e-9, sub_
     # create insider class
     object <- structure(list(), class = "insider")
     object[['data']] <- data
-    object[['confounder']] <- confounder
+
+    if(is.integer(interaction_idx) & (length(interaction_idx) > 1)){
+        
+        if(max(interaction_idx) > ncol(confounder)){
+            stop("The interaction_idx is out of the range of confounder!")
+        }
+
+        unique_cfd <- unique(confounder[, interaction_idx])
+
+        interaction_indicator <- rep(0, nrow(confounder))
+        for(k in 1:nrow(unique_cfd)){
+            selected <- apply(confounder[, interaction_idx], 1, function(x) all(x == unique_cfd[k,]))
+            interaction_indicator[selected] <- k
+        }
+    }
+    
+    object[['confounder']] <- cbind(confounder, interaction_indicator)
 
     params <- list(global_tol = global_tol, sub_tol = sub_tol,
                    tuning_iter = tuning_iter, max_iter = max_iter)
@@ -229,7 +245,7 @@ capture_interaction <- function(object, inc_cfd, latent_dimension, lambda, alpha
         rmse <- as.data.frame(rmse)
         colnames(rmse) <- c('lambda', 'alpha', 'train_rmse', 'test_rmse')
         
-	min_idx <- which.min(rmse[['test_rmse']])
+        min_idx <- which.min(rmse[['test_rmse']])
         lambda <- rmse[['lambda']][min_idx]
         alpha <- rmse[['alpha']][min_idx]
         tuning <- 0
