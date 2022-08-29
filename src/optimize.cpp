@@ -238,6 +238,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     return List::create(Named("row_matrices") = row_matrices,
                         Named("column_factor") = column_factor, 
+                        Named("train_rmse") = train_rmse, 
                         Named("test_rmse") = test_rmse, 
                         Named("loss") = loss);
 }
