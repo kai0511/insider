@@ -55,13 +55,14 @@ pheno <- dataset[,2]
 tissue <- dataset[,3]
 dataset <- dataset[, -(1:4)]
 # our fitted model 
-load("insider_ageing_fitted_object_26.RData")
+load("insider_ageing_R23_fitted_object.RData")
 # load("gene_expression_iMF_L1_penalty_25v2.RData")
 # attach(fitted_obj)
 attach(object) 
 disease_factor <- cfd_matrices[[1]]
 tissue_factor <- cfd_matrices[[2]]
 donor_factor <- cfd_matrices[[3]]
+interactions <- cfd_matrices[[4]]
 
 # read meta information to facilitate our analyis
 meta <- read.csv("meta_info.csv", header = TRUE, stringsAsFactors = F)
@@ -86,6 +87,8 @@ head(gene_info)
 
 The donor_factor is a low rank representation of genetic information from the dementia dataset, which is a matrix of $N$ rows and $K$ columns. $N$ is the number of donors and $K$ is the number of latent features representing gene expression information in low dimensions. In this section, the cluster analysis basically follows this [tutorial](uc-r.github.io/hc_clustering).
 
+We exclude a number of metagenes that is irrelevant to synapse function, cognition, and memory. The selection of metagenes is somewhat subjective. However, we observe that this strategy shows some interesting results. 
+
 ```{r, fig.height=6, size="small"}
 # for detail, see https://uc-r.github.io/hc_clustering methods to assess
 m <- c( "average", "single", "complete", "ward")
@@ -98,10 +101,10 @@ ac <- function(x) {
 ac_vec <- sapply(m, function(x) ac(x))
 ac_vec
 
+# for(i in seq(23)){
+exc_idx <- c(1, 7, 14, 18)
 # carry out hierarchical cluster analysis using the method with the greatest coefficient
-# hc3 <- agnes(donor_factor, method = "ward")
-hc3 <- agnes(donor_factor, method = unname(m[which(ac_vec == max(ac_vec))]))
-# pltree(hc3, cex = 0.6, hang = -1, main = "Dendrogram of donor clustering", labels = NULL)
+hc3 <- agnes(donor_factor[,-exc_idx], method = unname(m[which(ac_vec == max(ac_vec))]))
 hc <- as.hclust(hc3)
 ggdendrogram(hc, theme_dendro = FALSE) +
   ggtitle("Dendrogram of donor clustering") + ylab("Height") +
@@ -112,78 +115,33 @@ ggdendrogram(hc, theme_dendro = FALSE) +
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 
-# par(cex=0.4, mar=c(5, 8, 4, 1))
-# plot(hc, ylab = "Height", main = "Dendrogram of donor clustering", label = F, hang = -1, xlab = "", sub = "")
 # select cluster number using Gap statistics
-gap_stat <- clusGap(donor_factor, FUN = hcut, nstart = 25, K.max = 10, B = 200)
-fviz_gap_stat(gap_stat)
-
-# choose 3 clusters by investigating Dendrogram and Gap statistics plots 
-sub_grp <- cutree(hc3, k = 3)
-result <- cbind(meta, cluster_id = sub_grp)
-aov_res <- aov(age ~ cluster_id, data = result)
-unname(unlist(summary(aov_res)))[9]
-kruskal.test(age ~ cluster_id, data = result)
-fisher.test(table(result$cluster_id, result$braak), simulate.p.value=TRUE)
+# gap_stat <- clusGap(donor_factor[,-exc_idx], FUN = hcut, nstart = 25, K.max = 10, B = 200)
+# fviz_gap_stat(gap_stat)
 ```
 
-In this part, we exclude a number of metagenes that is irrelevant to synapse function, cognition, and memory. The selection of metagenes is somewhat subjective. However, we observe that this strategy shows some interesting results. 
-
-```{r}
-# ord <- order(apply(disease_factor, 2, function(x) abs(x[2] - x[1])), decreasing = F) # (1, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 23)
-
-# result <- sapply(ord, function(i){
-#   hc3 <- agnes(donor_factor[, -c(i, 10, 18, 7,6)], method = "ward")
-
-#   sub_grp <- cutree(hc3, k = 3)
-#   result <- cbind(meta, cluster_id = sub_grp)
-#   aov_res <- aov(age ~ cluster_id, data = result)
-#   print(unname(unlist(summary(aov_res)))[9])
-# })
-
-
-
-# hc <- as.hclust(hc3)
-# ggdendrogram(hc, theme_dendro = FALSE) +
-#   ggtitle("Dendrogram of donor clustering") + ylab("Height") +
-#   theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-#   theme(plot.title = element_text(hjust = 0.5, size=16,face="bold"), 
-#         text=element_text(family="Times New Roman"), 
-#         axis.title.x=element_blank(),
-#         axis.text.x=element_blank(),
-#         axis.ticks.x=element_blank())
-
-# sub_grp <- cutree(hc3, k = 3)
-# result <- cbind(meta, cluster_id = sub_grp)
-# aov_res <- aov(age ~ cluster_id, data = result)
-# unname(unlist(summary(aov_res)))[9]
-
-# fisher.test(table(result$cluster_id, result$nincds_arda_diagnosis)[,-1]) 
-# fisher.test(table(result$cluster_id, result$dsm_iv_clinical_diagnosis)[,-c(4,5)])
-```
 
 ##  explore the relavance of the clustering
 
 In this section, we only examined the association between the age of donors and their clusters. Explorations of the relavance of the clustering to other clinical variables can also be carried out. Pie charts and histograms can be drawn to visualize the association. Furthermore, some statistical tests can also be used to check the significance. The result below shows that there is a statistical significant association between the age and clustering. 
 
 ```{r}
-# result <- cbind(meta, cluster_id = sub_grp)
-# head(result)
-# aov_res <- aov(age ~ cluster_id, data = result)
-# summary(aov_res)
-# kruskal.test(age ~ cluster_id, data = result)
+# choose 3 clusters by investigating Dendrogram and Gap statistics plots 
+sub_grp <- cutree(hc3, k = 3)
+result <- cbind(meta, cluster_id = sub_grp)
+aov_res <- aov(age ~ cluster_id, data = result)
+unname(unlist(summary(aov_res)))[9]
+
+kruskal.test(age ~ cluster_id, data = result)
+fisher.test(table(result$cluster_id, result$braak), simulate.p.value=TRUE)
+
+fisher.test(table(result$cluster_id, result$nincds_arda_diagnosis)[,-1]) 
+fisher.test(table(result$cluster_id, result$dsm_iv_clinical_diagnosis)[,-c(4,5)])
 ```
 
 The below histogram show the dribution of clusters cross different braak stages, which are clinical diagnoses of stage of dementia.
 
 ```{r, fig.height=6, size="small"}
-# cluster_sex <- table(result$cluster_id, result$sex)
-# par(mar=c(5, 13, 3, 13))
-# barplot(cluster_sex, main="number of observations",
-#   xlab="SEX", col= brewer.pal(3, "Set2") ,
-#   legend = rownames(cluster_sex), space = 0.2, width = 0.2, 
-#   args.legend = list(x = "topleft"))
-
 cluster_tbi <- table(result$cluster_id, result$braak)
 par(mar=c(5, 13, 3, 13))
 barplot(cluster_tbi, main="number of observations",
@@ -196,24 +154,25 @@ barplot(cluster_tbi, main="number of observations",
 We can also investigate biological processes we are interested in with our results. For example, we explored the mechanism of dementia with the disease and gene factors. We obtained the expression profiles for the dementia and control, extracted the genes with greatest postive difference between them, and examine the biological processes enriched by those genes. 
 
 ```{r, fig.height=6, size="small"}
-idx <- order(apply(disease_factor, 2, var), decreasing = T)[1:2]  # 1, 4, 5?, 8, 9,14,15,18,20,23,26
+idx <- order(apply(disease_factor, 2, function(x) abs(x[1] - x[2])), decreasing = T)[1:2] 
 disease_matrix <- disease_factor[,idx, drop = F] %*% column_factor[idx, , drop = F]
 diff <- disease_matrix[2,] - disease_matrix[1,]
-cutoffs <- quantile(diff, probs = seq(0, 1, 0.025)) 
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
 selected <- (diff <= cutoffs[2]) # greatest negative difference
-# selected <- (diff >= cutoffs[length(cutoffs)-1])  # greatest positive difference
+# selected <- (diff >= cutoffs[length(cutoffs)-1])  
 
-# head(gene_info[selected,3])
-upreg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
+down_reg <- enrichGO(gene   = unique(gene_info_inc[selected,3]),
                   OrgDb     = 'org.Hs.eg.db',
                   ont       = "BP",
                   readable  = TRUE)
 
-dotplot(upreg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(down_reg, font.size = 8, showCategory=30, label_format = 50) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
-```{r, fig.height=5, fig.width = 15, size="large"}
+## compare expression level across different brain structures for selected genes 
+
+```{r, fig.height=12, fig.width = 14, size="small"}
 loadfonts(quiet = T)
 
 structure_names <- c("TC left", "FWM right", "FWM left", "HPC right", "PC right", "TC right", "HPC left", "PC left")
@@ -221,7 +180,7 @@ structure_names <- c("TC left", "FWM right", "FWM left", "HPC right", "PC right"
 # result <- as.data.frame(upreg)
 # gene_names <- unlist(strsplit(result[1,8], split = "/"))
 
-selected <- c("PLEKHG5", "NCS1", "GRIK5", "CACNG3")
+selected <- c("PLEKHG5", "NCS1", "GRIK5", "NRGN")
 
 row_ids <- unlist(sapply(selected, function(x) which(gene_info_inc[[4]] == x)))
 data <- cbind(pheno, structure_names[tissue], dataset[,row_ids])
@@ -239,8 +198,6 @@ names(simes_pvalues) <- names(row_ids)
 colnames(test_results) <- names(row_ids)
 rownames(test_results) <- structure_names
 
-# selected <- c("PLEKHG5", "NCS1", "GRIK5", "CACNG3")
-# par(mfrow = c(1, 3))
 p1 <- ggplot(data, aes(x=tissue, y=PLEKHG5, fill=pheno)) + 
     scale_color_viridis(discrete = TRUE) +
     geom_boxplot() + 
@@ -265,15 +222,15 @@ p3 <- ggplot(data, aes(x=tissue, y=GRIK5, fill=pheno)) +
     theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-# p4 <- ggplot(data, aes(x=tissue, y=CACNG3, fill=pheno)) +
-#     scale_color_viridis(discrete = TRUE) +
-#     geom_boxplot() + 
-#     ggtitle("NCS1 expression") +
-#     xlab("") + ylab("Levels") +
-#     theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-#     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+p4 <- ggplot(data, aes(x=tissue, y=NRGN, fill=pheno)) +
+    scale_color_viridis(discrete = TRUE) +
+    geom_boxplot() + 
+    ggtitle("NRGN expression") +
+    xlab("") + ylab("Levels") +
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-grid.arrange(p1, p2, p3, nrow=1) 
+grid.arrange(p1, p2, p3, p4, nrow=2, ncol=2) 
 ```
 
 Here is a another pieces of code to demenstrate molecular functions of genes with the largest effects in different brain structures. 
@@ -281,13 +238,12 @@ Here is a another pieces of code to demenstrate molecular functions of genes wit
 \textcolor{red}{In this part of analysis, I only demonstrate with the second tissue. In order to expand, analysis of other metagenes with a single for loop is fine to generate all results.}
 
 ```{r, fig.height=6, size="small"}
-idx <- order(apply(tissue_factor, 2, function(x) truncated_var(x)))[1:4]
-tissue_matrix <- tissue_factor[,-idx] %*% column_factor[-idx, ]
+idx <- order(apply(tissue_factor, 2, function(x) truncated_var(x)),decreasing=T)[1:3]
+tissue_matrix <- tissue_factor[,idx] %*% column_factor[idx, ]
 row.names(tissue_matrix) <- structure_info$snames
 id <- 2 
 cat("tissue name:", row.names(tissue_matrix)[id], "\n")
 cutoffs <- quantile(tissue_matrix[id, ], probs = seq(0, 1, 0.025)) 
-# selected <- (tissue_matrix[id,] <= cutoffs[2]) # greatest negative difference
 selected <- (tissue_matrix[id, ] >= cutoffs[length(cutoffs)-1])  # greatest positive difference
 
 # head(gene_info[selected,3])
@@ -309,43 +265,51 @@ dotplot(down_reg, font.size = 9, showCategory=30, label_format = 50) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
-Furthermore, we could also examine the interaction between tissue and disease factors. The code below explores the interaction between different tissues and dementia. Then, similar techniques can be employed to examine the contribution of underlying biological processes to the interaction.
-
-\textcolor{red}{In this part of analysis, I only demonstrate with the parietal neocortex(right). In order to expand, analysis of temporal neocortex(right) and white matter of forebrain(left) with a single for loop is enough.}
+Furthermore, we could also examine the interaction between tissue and disease factors. The code below explores the interaction between different tissues and dementia. Then, similar techniques can be employed to examine the contribution of underlying biological processes to the interaction. 
 
 ```{r, fig.height=6, size="small"}
-# # since all latent vectors are restricted in the same space, we can compute the correlation between disease and tissue factos. 
-# row.names(tissue_factor) <- structure_info$snames
-# scores <- cor(t(tissue_factor[,-idx[1]]), t(disease_factor[, -idx[1]]))
-# print(scores)
+# since all latent vectors are restricted in the same space, we can compute the correlation between disease and tissue factos. 
+confounder <- object[['confounder']][,-3]
+unique_cfd <- unique(confounder)
 
-# # then we can examine the tissue with the largest change in correlation
-# tissue_id <- 3
-# cat("Tissue name:", rownames(tissue_factor)[tissue_id], "\n")
+distances <- sapply(seq(8), function(i){
+  idx <- which(unique_cfd[,2] == i)
+  # mean((interactions[idx,1] - interactions[idx,2])^2)
+  t.test(interactions[idx,1], interactions[idx,2], paired = T)$p.value
+})
 
-# interaction <- t(apply(disease_factor[,-idx[1]], 1, function(x) x * tissue_factor[tissue_id, -idx[1]]))
-# interaction_matrix <- interaction %*% column_factor[-idx[1], ]
-# diff <- interaction_matrix[2,] - interaction_matrix[1,]
+# then we can examine the tissue with the largest distance between dementia and control
+tissue_id <- which.min(distances)  
+cat("Tissue name:", structure_info$snames[tissue_id], "\n")
 
-# cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+cfd_id <- which(unique_cfd[,2] == tissue_id)
+```
 
-# # up-regulation, greatest positive difference
-# # selected <- (diff >= cutoffs[length(cutoffs)-1])  
-# # upreg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
-# #                   OrgDb     = 'org.Hs.eg.db',
-# #                   ont       = "BP",
-# #                   readable  = TRUE)
+```{r, fig.height=6, size="small"}
+selected <- order(apply(interactions[cfd_id, ], 2, var), decreasing = TRUE)[1:3]
 
-# # dotplot(upreg, font.size = 9, showCategory=30, label_format = 50) + 
-# #   theme(text=element_text(family="Times New Roman"))
+interaction_matrix <- interactions[cfd_id, selected, drop = F] %*% column_factor[selected, , drop = F]
+diff <- interaction_matrix[2, ] - interaction_matrix[1,]
 
-# # up-regulation, greatest negative difference
-# selected <- (diff <= cutoffs[2])
-# downreg <- enrichGO(gene    = unique(gene_info_inc[selected,3]),
-#                     OrgDb     = 'org.Hs.eg.db',
-#                     ont       = "BP",
-#                     readable  = TRUE)
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
 
-# dotplot(downreg, font.size = 9, showCategory=30, label_format = 50) + 
-#   theme(text=element_text(family="Times New Roman"))
+# up-regulation, greatest positive difference
+selected <- (diff >= cutoffs[length(cutoffs)-1])  
+upreg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
+                  OrgDb     = 'org.Hs.eg.db',
+                  ont       = "BP",
+                  readable  = TRUE)
+
+dotplot(upreg, font.size = 8, showCategory=30, label_format = 80) + 
+  theme(text=element_text(family="Times New Roman"))
+
+# down-regulation, greatest negative difference
+selected <- (diff <= cutoffs[2])
+downreg <- enrichGO(gene    = unique(gene_info_inc[selected,3]),
+                    OrgDb     = 'org.Hs.eg.db',
+                    ont       = "BP",
+                    readable  = TRUE)
+
+dotplot(downreg, font.size = 9, showCategory=30, label_format = 50) + 
+  theme(text=element_text(family="Times New Roman"))
 ```
