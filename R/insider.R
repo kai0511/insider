@@ -145,7 +145,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
             }else{
                 reg_tuning <- rbind(reg_tuning, c(round(param_grid[i,], 2), fitted_obj$train_rmse, fitted_obj$test_rmse))
             }
-            write.csv(reg_tuning, file = 'insider_R', latent_rank, '_reg_tuning_result.csv')
+            write.csv(reg_tuning, file = paste0('insider_R', latent_rank, '_reg_tuning_result.csv'))
         }
     }
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
@@ -162,8 +162,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
 #' @export
 #'
 #' @examples fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
-#' 
-fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
+fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, partition = 0){
     
     global_tol <- object[['params']][['global_tol']]
     sub_tol <- object[['params']][['sub_tol']]
@@ -178,7 +177,7 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
     fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                           latent_dimension, lambda, alpha, 0, global_tol, sub_tol, max_iter);
+                           latent_dimension, lambda, alpha, partition, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
     object[['column_factor']] <- fitted_obj[['column_factor']]
