@@ -157,6 +157,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
 #' @param latent_dimension the selected rank of latent representations
 #' @param lambda a vector of l2 penalty 
 #' @param alpha a vector of l1 penalty 
+#' @param partition should be either 1 or 0. 1 indicates only trainset used for fitting, and 0 indicates the whole data matrix used for fitting.
 #'
 #' @return the fitted insider object with the provided hyperparameters.
 #' @export
