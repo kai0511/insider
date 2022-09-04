@@ -1,23 +1,23 @@
 #' create an insider object with the provided parameters
 #'
-#' @param data the whole data for insider, including trainset and testset
-#' @param confounder a matrix with each column indicating the belonging for each covariate
-#' @param split_ratio a proportion of elements from data considered as testset
-#' @param global_tol the global convergence criteria
-#' @param sub_tol  the convergence creteria for each elastic net problem
+#' @param data the data for insider interpretation
+#' @param confounder a matrix of dummy variables, which indicates the belonging of each row for several covariates. Here covariates are discreate variables, such as gender, sex, development stages, and etc.
+#' @param interaction_idx a integer vector of indices corresponding to confounder matrix to incorporate interaction between covariates, e.g., as.integer(c(1, 2)) to introduce interactions between the first and second covariates
+#' @param split_ratio a proportion of elements from data that will be considered as testset, and the left over is testset. 
+#' @param global_tol the global convergence criteria. When the criteria is met, iteraction will be terminated.
+#' @param sub_tol the convergence creteria for elastic net problems, which can be decreased with decreasing the loss of the objective function.
 #' @param tuning_iter number of steps will run in tuning
-#' @param max_iter maxiumme number of steps will run in fitting insider
+#' @param max_iter the maxiumme number of iterations. When it is reached, iteraction will terminated even if the global convergence criteria does not meet.
 #'
 #' @return an insider object
 #' @export
 #'
-#' @examples ..
+#' @examples object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10)
+#' 
 insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
 
     # split data into two pieces
     dataset <- ratio_splitter(data, ratio = split_ratio)
-    trainset <- dataset[['trainset']]
-    testset <- dataset[['testset']]
 
     # create insider class
     object <- structure(list(), class = "insider")
@@ -53,17 +53,18 @@ insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global
     return(object)
 }
 
-#' tune hyperparameters for insider object
+#' tune hyperparameters for the insider model and save tuning results in the local
 #'
 #' @param object an insider object
-#' @param latent_dimension the rank of latent representations
-#' @param lambda l2-regularization for insider
-#' @param alpha l1-regularization for insider
+#' @param latent_dimension a vector of ranks for selection. When tuning the rank, the default lambda and alpha are 1 and 0.1, respectively.
+#' @param lambda a vector of l2 penalty 
+#' @param alpha a vector of l1 penalty, ranging from 0.1 to 1.
 #'
 #' @return tuning results
 #' @export
 #'
-#' @examples ..
+#' @examples object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(1, 50, by = 5), alpha = seq(0.1, 0.6, by = 0.1))
+#' 
 tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     
     if(!is.integer(latent_dimension) | !is.numeric(lambda) | !is.numeric(alpha)){
@@ -150,17 +151,18 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
     return(list(rank_tuning = rank_tuning, latent_rank = latent_rank, reg_tuning = reg_tuning))
 }
 
-#' fit insider object
+#' fit insider object with selected hyperparameter.
 #'
 #' @param object an insider object
-#' @param latent_dimension the rank of latent representations
-#' @param lambda l2-regularization for insider
-#' @param alpha l1-regularization for insider
+#' @param latent_dimension the selected rank of latent representations
+#' @param lambda a vector of l2 penalty 
+#' @param alpha a vector of l1 penalty 
 #'
-#' @return a fitted insider object
+#' @return the fitted insider object with the provided hyperparameters.
 #' @export
 #'
-#' @examples ..
+#' @examples fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
+#' 
 fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL){
     
     global_tol <- object[['params']][['global_tol']]
