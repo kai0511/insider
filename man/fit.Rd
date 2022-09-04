@@ -2,25 +2,31 @@
 % Please edit documentation in R/insider.R
 \name{fit}
 \alias{fit}
-\title{fit insider object}
+\title{fit insider object with selected hyperparameter.}
 \usage{
-fit(object, latent_dimension = NULL, lambda = NULL, alpha = NULL)
+fit(
+  object,
+  latent_dimension = NULL,
+  lambda = NULL,
+  alpha = NULL,
+  partition = 0
+)
 }
 \arguments{
 \item{object}{an insider object}
 
-\item{latent_dimension}{the rank of latent representations}
+\item{latent_dimension}{the selected rank of latent representations}
 
-\item{lambda}{l2-regularization for insider}
+\item{lambda}{a vector of l2 penalty}
 
-\item{alpha}{l1-regularization for insider}
+\item{alpha}{a vector of l1 penalty}
 }
 \value{
-a fitted insider object
+the fitted insider object with the provided hyperparameters.
 }
 \description{
-fit insider object
+fit insider object with selected hyperparameter.
 }
 \examples{
-..
+fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
 }

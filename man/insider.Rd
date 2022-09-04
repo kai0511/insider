@@ -16,19 +16,21 @@ insider(
 )
 }
 \arguments{
-\item{data}{the whole data for insider, including trainset and testset}
+\item{data}{the data for insider interpretation}
 
-\item{confounder}{a matrix with each column indicating the belonging for each covariate}
+\item{confounder}{a matrix of dummy variables, which indicates the belonging of each row for several covariates. Here covariates are discreate variables, such as gender, sex, development stages, and etc.}
 
-\item{split_ratio}{a proportion of elements from data considered as testset}
+\item{interaction_idx}{a integer vector of indices corresponding to confounder matrix to incorporate interaction between covariates, e.g., as.integer(c(1, 2)) to introduce interactions between the first and second covariates}
 
-\item{global_tol}{the global convergence criteria}
+\item{split_ratio}{a proportion of elements from data that will be considered as testset, and the left over is testset.}
 
-\item{sub_tol}{the convergence creteria for each elastic net problem}
+\item{global_tol}{the global convergence criteria. When the criteria is met, iteraction will be terminated.}
+
+\item{sub_tol}{the convergence creteria for elastic net problems, which can be decreased with decreasing the loss of the objective function.}
 
 \item{tuning_iter}{number of steps will run in tuning}
 
-\item{max_iter}{maxiumme number of steps will run in fitting insider}
+\item{max_iter}{the maxiumme number of iterations. When it is reached, iteraction will terminated even if the global convergence criteria does not meet.}
 }
 \value{
 an insider object
@@ -37,5 +39,6 @@ an insider object
 create an insider object with the provided parameters
 }
 \examples{
-..
+object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10)
+
 }

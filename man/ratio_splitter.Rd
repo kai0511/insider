@@ -7,9 +7,9 @@
 ratio_splitter(data, ratio = 0.1, rm.na.col = T)
 }
 \arguments{
-\item{data}{matrix for splitting}
+\item{data}{data matrix for splitting}
 
-\item{ratio}{a proportion of elements from data considered as testset}
+\item{ratio}{a proportion of elements considered as testset}
 
 \item{rm.na.col}{whether remove columns with all zeros}
 }
@@ -20,5 +20,5 @@ a list
 matrix splitting via element-wise sampling without replacement
 }
 \examples{
-..
+results <- ratio_splitter(data)
 }
