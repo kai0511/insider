@@ -20,6 +20,8 @@ fit(
 \item{lambda}{a vector of l2 penalty}
 
 \item{alpha}{a vector of l1 penalty}
+
+\item{partition}{should be either 1 or 0. 1 indicates only trainset used for fitting, and 0 indicates the whole data matrix used for fitting.}
 }
 \value{
 the fitted insider object with the provided hyperparameters.
