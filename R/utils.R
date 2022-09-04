@@ -66,14 +66,14 @@ obtain_indication_matrix <- function(trainset, only_positive = F){
 
 #' matrix splitting via element-wise sampling without replacement
 #'
-#' @param data matrix for splitting 
-#' @param ratio a proportion of elements from data considered as testset
+#' @param data data matrix for splitting 
+#' @param ratio a proportion of elements considered as testset
 #' @param rm.na.col whether remove columns with all zeros
 #' 
 #' @return a list 
 #' @export
 #'
-#' @examples ..
+#' @examples results <- ratio_splitter(data)
 
 ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T){
     # default ratio for test is 0.1, that is, 10% obs. will be randomly assigned to testset
