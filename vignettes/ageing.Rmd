@@ -178,12 +178,11 @@ idx <- order(apply(disease_factor, 2, function(x) abs(x[1] - x[2])), decreasing 
 disease_matrix <- disease_factor[,idx, drop = F] %*% column_factor[idx, , drop = F]
 diff <- disease_matrix[2,] - disease_matrix[1,]
 
-# -c(1, 22, 10)
-idx <- 10
-# cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
-# selected <- (diff >= cutoffs[length(cutoffs)-1])  
-cutoffs <- quantile(column_factor[idx,], probs = seq(0, 1, 0.025))
-selected <- (diff <= cutoffs[2]) # greatest negative difference
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+selected <- (diff <= cutoffs[2])  
+# selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+# cutoffs <- quantile(column_factor[idx,], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx,] <= cutoffs[2]) # greatest negative difference
 
 down_reg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
                      OrgDb     = 'org.Hs.eg.db',
