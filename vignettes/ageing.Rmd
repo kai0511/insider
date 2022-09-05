@@ -101,7 +101,38 @@ ac <- function(x) {
 ac_vec <- sapply(m, function(x) ac(x))
 ac_vec
 
+# carry out hierarchical cluster analysis using the method with the greatest coefficient
+hc3 <- agnes(donor_factor[,-c(14)], method = unname(m[which(ac_vec == max(ac_vec))]))
+hc <- as.hclust(hc3)
+ggdendrogram(hc, theme_dendro = FALSE) +
+  ggtitle("Dendrogram of donor clustering") + ylab("Height") +
+  theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
+  theme(plot.title = element_text(hjust = 0.5, size=16,face="bold"), 
+        text=element_text(family="Times New Roman"), 
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
+# select cluster number using Gap statistics
+# gap_stat <- clusGap(donor_factor, FUN = hcut, nstart = 25, K.max = 10, B = 200)
+# fviz_gap_stat(gap_stat)
+
+# choose 3 clusters by investigating Dendrogram and Gap statistics plots 
+sub_grp <- cutree(hc3, k = 2)
+result <- cbind(meta, cluster_id = sub_grp)
+aov_res <- aov(age ~ cluster_id, data = result)
+unname(unlist(summary(aov_res)))[9]
+
+kruskal.test(age ~ cluster_id, data = result)
+fisher.test(table(result$cluster_id, result$braak), simulate.p.value=TRUE)
+```
+
+
+##  explore the relavance of the clustering
+
+In this section, we only examined the association between the age of donors and their clusters. Explorations of the relavance of the clustering to other clinical variables can also be carried out. Pie charts and histograms can be drawn to visualize the association. Furthermore, some statistical tests can also be used to check the significance. The result below shows that there is a statistical significant association between the age and clustering. 
+
+```{r}
 exc_idx <- c(4, 5, 8, 19)
 # carry out hierarchical cluster analysis using the method with the greatest coefficient
 hc3 <- agnes(donor_factor[,-exc_idx], method = unname(m[which(ac_vec == max(ac_vec))]))
@@ -115,17 +146,6 @@ ggdendrogram(hc, theme_dendro = FALSE) +
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 
-# select cluster number using Gap statistics
-# gap_stat <- clusGap(donor_factor[,-exc_idx], FUN = hcut, nstart = 25, K.max = 10, B = 200)
-# fviz_gap_stat(gap_stat)
-```
-
-
-##  explore the relavance of the clustering
-
-In this section, we only examined the association between the age of donors and their clusters. Explorations of the relavance of the clustering to other clinical variables can also be carried out. Pie charts and histograms can be drawn to visualize the association. Furthermore, some statistical tests can also be used to check the significance. The result below shows that there is a statistical significant association between the age and clustering. 
-
-```{r}
 # choose 3 clusters by investigating Dendrogram and Gap statistics plots 
 sub_grp <- cutree(hc3, k = 3)
 result <- cbind(meta, cluster_id = sub_grp)
@@ -157,9 +177,13 @@ We can also investigate biological processes we are interested in with our resul
 idx <- order(apply(disease_factor, 2, function(x) abs(x[1] - x[2])), decreasing = T)[1:2] 
 disease_matrix <- disease_factor[,idx, drop = F] %*% column_factor[idx, , drop = F]
 diff <- disease_matrix[2,] - disease_matrix[1,]
-cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
-selected <- (diff <= cutoffs[2]) # greatest negative difference
+
+# -c(1, 22, 10)
+idx <- 10
+# cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
 # selected <- (diff >= cutoffs[length(cutoffs)-1])  
+cutoffs <- quantile(column_factor[idx,], probs = seq(0, 1, 0.025))
+selected <- (diff <= cutoffs[2]) # greatest negative difference
 
 down_reg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
                      OrgDb     = 'org.Hs.eg.db',
