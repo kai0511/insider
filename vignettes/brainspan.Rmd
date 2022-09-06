@@ -163,7 +163,8 @@ result$stage <- factor(r_names, levels = r_names)
 ggplot(data = result, aes(x = stage, y = levels, group = 1)) + 
   scale_color_viridis(discrete = T) + 
   scale_x_discrete(labels=2:14)+
-  geom_line() + theme_ipsum(base_family = "Times New Roman", base_size= 14, axis_title_size = 16) + 
+  geom_line() + 
+  theme_ipsum(base_family = "Times New Roman", base_size= 14, axis_title_size = 16) + 
   xlab("Stages") + ylab("Levels") 
   #axis.text.x = element_text(size=10,angle = 45, vjust = 1, hjust=1))
 ```
