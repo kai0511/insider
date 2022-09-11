@@ -91,7 +91,7 @@ upreg <- enrichGO(gene      = unique(meta[selected,1]),
                   readable  = TRUE)
 
 # summary(upreg)
-dotplot(upreg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(upreg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
@@ -110,7 +110,7 @@ downreg <- enrichGO(gene          = unique(meta[selected,1]),
                     keyType       = 'ENSEMBL',
                     ont           = "BP",
                     readable      = TRUE)
-dotplot(downreg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(downreg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
@@ -128,6 +128,7 @@ distantces <- sapply(seq(13), function(i){
   interaction_idx <- which(combinations[,2] == i)
   selected <- interaction[interaction_idx, ]
   distance <- mean((selected[1, ] - selected[2, ])^2)
+  # distance <- cor(selected[1, ], selected[2, ], method = "pearson")
 })
 
 idx <- which.max(distantces)
@@ -148,7 +149,7 @@ downreg <- enrichGO(gene      = unique(meta[selected_idx,1]),
                     keyType     = 'ENSEMBL',
                     ont         = "BP",
                     readable    = TRUE)
-dotplot(downreg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(downreg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
@@ -162,6 +163,6 @@ upreg <- enrichGO(gene       = unique(meta[selected_idx,1]),
                     keyType    = 'ENSEMBL',
                     ont        = "BP",
                     readable   = TRUE)
-dotplot(upreg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(upreg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```

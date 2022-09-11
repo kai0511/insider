@@ -43,57 +43,6 @@ wrap_labal <- function(x, width = 60){
 }
 ```
 
-```{r}
-glm_interaction <- function(object, inc_cfd){
-
-  residual <- object[['data']]
-
-  confounder_num <- ncol(object[['confounder']])
-  for(i in 1:confounder_num){
-    sub_predictions <- object[['cfd_matrices']][[i]] %*% object[['column_factor']]
-    residual <- residual - sub_predictions[object[['confounder']][,i], ]
-  }
-  
-  column_factor <- object[['column_factor']]
-  train_indicator <- object[['train_indicator']]
-  
-  confounder <- object[['confounder']][, inc_cfd]
-  unique_cfd <- unique(confounder)
-
-  interaction_indicator <- rep(0, nrow(confounder))
-  for(k in 1:nrow(unique_cfd)){
-    selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
-    interaction_indicator[selected] <- k
-  }
-
-  unique_ita <- unique(interaction_indicator)
-  coeff_matrix <- matrix(0, nrow = length(unique_ita), ncol = nrow(column_factor))
-  pval_matrix <- matrix(0, nrow = length(unique_ita), ncol = nrow(column_factor))
-
-  for(i in unique_ita) {
-
-    ids <- which(interaction_indicator == i);
-
-    st_idx <- 1; ed_idx <- 1
-    nonzero_num <- length(ids) * ncol(column_factor);
-    outcomes = rep(0,nonzero_num);
-    features = matrix(0, nrow = nonzero_num, ncol = nrow(column_factor))
-
-    for(k in ids){
-      ed_idx = st_idx + ncol(column_factor) - 1;
-      features[st_idx:ed_idx, ] = t(column_factor);
-      outcomes[st_idx:ed_idx] = residual[k,];
-      st_idx = ed_idx + 1
-    }
-
-    data <- data.frame(response = outcomes, features)
-    fit <- glm(response ~ . - 1, family = gaussian(), data = data)
-    coeff_matrix[i,] <- unname(coefficients(fit))
-    pval_matrix[i,] <- coef(summary(fit))[,4]
-  }
-  return(list(unique_cfd, coeff_matrix, pval_matrix))
-}
-```
 
 ```{r, size="small"}
 opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
@@ -148,7 +97,7 @@ cat("Column_id:", metagene_id, "\n")
 
 The plot below show the trajectory of the selected metagene cross all development stages.
 
-```{r, fig.height=5, fig.width=7}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(100)), fig.height=5, fig.width=7}
 loadfonts(quiet = T)
 result <- data.frame(stage = r_names, levels = stage_factor[, metagene_id], stringsAsFactors = F)
 result$stage <- factor(r_names, levels = r_names)
@@ -171,7 +120,7 @@ ggplot(data = result, aes(x = stage, y = levels, group = 1)) +
 
 Then, we investigated the pathway enriched for top 2.5% genes that up-regulates and down-regulates this metagene.
 
-```{r, fig.height=7, size="small"}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(100)), fig.height=7, size="small"}
 cat("Column_id:", metagene_id, "\n")
 
 cutoffs <- quantile(column_factor[metagene_id,], probs = seq(0, 1, 0.025))
@@ -197,7 +146,7 @@ dotplot(downreg, font = 9, showCategory=30, label_format = 60) +
 
 Then, we explore the metagene with the least variance.
 
-```{r, fig.height=7, size="small"}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(100)), fig.height=7, size="small"}
 # metagene_id <- ord[length(ord)]
 metagene_id <- which.min(apply(tissue_factor, 2, function(x) truncated_var(x)))
 cat("Column_id:", metagene_id, "\n")
@@ -225,7 +174,7 @@ dotplot(downreg, font = 9, showCategory=30, label_format = 50) +
 ```
 
 
-```{r fig.width= 12, fig.height=5}
+```{r tidy=TRUE, tidy.opts=list(width.cutoff=I(100)), fig.width= 10, fig.height=4}
 metagene_id <- ord[1]
 gene_order <- order(column_factor[metagene_id,], decreasing = TRUE)
 selected_genes <- gene_id[gene_order[1:5],]
@@ -250,21 +199,23 @@ colnames(result2) <- c("Stage", "Gene", "Levels")
 result2$Stage <- factor(r_names, levels = r_names)
 
 p1 <- ggplot(data = result1, aes(x=Stage, y=Levels, group = Gene, color=Gene)) +
+    xlab("Stages") + ylab("Levels")+
     scale_color_viridis(discrete = TRUE) +
     geom_line(size=1) +
     ggtitle("Trajectories of top up-regulated genes") +
     theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 16) +
-    scale_x_discrete(labels=2:14)+
-    xlab("Stages") + ylab("Levels")
+    theme(plot.margin = unit(c(5, 2, 5, 2), "pt"))+
+    scale_x_discrete(labels=2:14)
 
 p2 <- ggplot(data = result2, aes(x=Stage, y=Levels, group = Gene, color=Gene)) +
+    xlab("Stages") + ylab("Levels")+
     scale_color_viridis(discrete = TRUE) +
     geom_line(size=1) +
     ggtitle("Trajectories of top down-regulated genes") +
     theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 16) +
-    scale_x_discrete(labels=2:14)+
-    xlab("Stages") + ylab("Levels")
-  
+    theme(plot.margin = unit(c(5, 2, 5, 2), "pt"))+
+    scale_x_discrete(labels=2:14)
+
 grid.arrange(p1, p2, ncol=2) 
 ```
 
@@ -274,7 +225,7 @@ First, we obtain general expression profiles for different tissues, and analyze 
 
 \textcolor{red}{In this part of analysis, I only demonstrate with the second tissue. In order to expand, analysis of other metagenes with a single for loop is fine to generate results for all tissues.}
 
-```{r, fig.height=7, size="small"}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(120)), fig.height=7, size="small"}
 # tissue_matrix <- tissue_factor[,-c(14)] %*% column_factor[-c(14),]
 tissue_matrix <- tissue_factor %*% column_factor
 rownames(tissue_matrix) <- rownames(tissue_factor)
@@ -323,7 +274,7 @@ Second, we explore the pathways that contribute the most to the expression diffe
 
 \textcolor{red}{The second kind of analysis only can partial explain the pathways that signal differently across all tissues in our study, so expanding it with other two or three metagenes with high variance is enough.}
 
-```{r, fig.height=7, size="small"}
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(120)), fig.height=7, size="small"}
 # tiss_var <- apply(tissue_factor, 2, var)
 tiss_var <- apply(tissue_factor, 2, function(x) truncated_var(x))
 
@@ -342,65 +293,3 @@ dotplot(upreg, font = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
-## Explore the interaction between development stages and brain regions
-
-\textcolor{red}{Exploring the interaction is an important feature of our approach, so if possible we may carry out analysis on all possible combinations between brain regions and development stages and select reasonable results for interpretation.
-
-
-```{r, fig.height=7, size="small"}
-table(dic[,c(9, 11)])
-
-# interactions <- glm_interaction(object, c(1, 2))
-
-# unique_cfd <- interactions[[1]] 
-# coeff_matrix <- interactions[[2]] 
-# pval_matrix <- interactions[[3]]
-
-# interaction_indicator <- rep(0, nrow(object[['confounder']]))
-# for(k in 1:nrow(unique_cfd)){
-#   selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
-#   interaction_indicator[selected] <- k
-# }
-
-# intersted_idx <- which(apply(pval_matrix, 1, function(x) sum(x < 1e-8)) == 19)
-
-# confound_values <- (confounder[which(interaction_indicator == intersted_idx[3]), ])
-
-# stage_id <- r_names[confound_values[1]]
-# tissue_id <- structure[confound_values[2], 1]
-
-# metagene_id <- which.max(coeff_matrix[intersted_idx[3],])
-
-# # which.min(coeff_matrix[intersted_idx[3],])
-
-
-# cutoffs <- quantile(column_factor[metagene_id,], probs = seq(0, 1, 0.025))
-
-# # up-regulation, select the highest quantile
-# selected <- (column_factor[metagene_id,] >= cutoffs[length(cutoffs) - 1]) 
-
-# # # down-regulation, select the lowest quantile
-# # selected <- (interaction_effect <= cutoffs[2]) 
-# upreg <- enrichGO(gene = unique(meta[selected,5]),
-#                   OrgDb = 'org.Hs.eg.db',
-#                   ont = "BP",
-#                   readable = TRUE)
-
-# dotplot(upreg, font = 9, showCategory=30) + 
-#   scale_y_discrete(labels = function(x) wrap_labal(x))+ 
-#   theme(text=element_text(family="Times New Roman"))
-
-# # up-regulation, select the highest quantile
-# selected <- (interaction_effect <= cutoffs[2])
-
-# # down-regulation, select the lowest quantile
-# # selected <- (interaction_effect <= cutoffs[2]) 
-# downreg <- enrichGO(gene = unique(meta[selected,5]),
-#                     OrgDb = 'org.Hs.eg.db',
-#                     ont = "BP",
-#                     readable = TRUE)
-
-# dotplot(downreg, font = 9, showCategory=30) + 
-#   scale_y_discrete(labels = function(x) wrap_labal(x))+ 
-#   theme(text=element_text(family="Times New Roman"))
-```

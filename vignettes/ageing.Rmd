@@ -127,7 +127,6 @@ kruskal.test(age ~ cluster_id, data = result)
 fisher.test(table(result$cluster_id, result$braak), simulate.p.value=TRUE)
 ```
 
-
 ##  explore the relavance of the clustering
 
 In this section, we only examined the association between the age of donors and their clusters. Explorations of the relavance of the clustering to other clinical variables can also be carried out. Pie charts and histograms can be drawn to visualize the association. Furthermore, some statistical tests can also be used to check the significance. The result below shows that there is a statistical significant association between the age and clustering. 
@@ -195,7 +194,7 @@ dotplot(down_reg, font.size = 8, showCategory=30, label_format = 80) +
 
 ## compare expression level across different brain structures for selected genes 
 
-```{r, fig.height=12, fig.width = 12, size="small"}
+```{r, fig.height=4, fig.width = 12, size="small"}
 loadfonts(quiet = T)
 
 structure_names <- c("TC left", "FWM right", "FWM left", "HPC right", "PC right", "TC right", "HPC left", "PC left")
@@ -226,34 +225,34 @@ p1 <- ggplot(data, aes(x=tissue, y=PLEKHG5, fill=pheno)) +
     geom_boxplot() + 
     ggtitle("PLEKHG5 expression") +
     xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
 p2 <- ggplot(data, aes(x=tissue, y=NCS1, fill=pheno)) + 
     scale_color_viridis(discrete = TRUE) +
     geom_boxplot() + 
     ggtitle("NCS1 expression") +
     xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
 p3 <- ggplot(data, aes(x=tissue, y=GRIK5, fill=pheno)) +
     scale_color_viridis(discrete = TRUE) +
     geom_boxplot() + 
     ggtitle("GRIK5 expression") +
     xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
-p4 <- ggplot(data, aes(x=tissue, y=NRGN, fill=pheno)) +
-    scale_color_viridis(discrete = TRUE) +
-    geom_boxplot() + 
-    ggtitle("NRGN expression") +
-    xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+# p4 <- ggplot(data, aes(x=tissue, y=NRGN, fill=pheno)) +
+#     scale_color_viridis(discrete = TRUE) +
+#     geom_boxplot() + 
+#     ggtitle("NRGN expression") +
+#     xlab("") + ylab("Levels") +
+#     theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
+#     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
-grid.arrange(p1, p2, p3, p4, nrow=2, ncol=2) 
+grid.arrange(p1, p2, p3, nrow=1, ncol=3) 
 ```
 
 Here is a another pieces of code to demenstrate molecular functions of genes with the largest effects in different brain structures. 
@@ -264,8 +263,8 @@ Here is a another pieces of code to demenstrate molecular functions of genes wit
 idx <- order(apply(tissue_factor, 2, function(x) truncated_var(x)),decreasing=T)[1:3]
 tissue_matrix <- tissue_factor[,idx] %*% column_factor[idx, ]
 row.names(tissue_matrix) <- structure_info$snames
-id <- 2 
-cat("tissue name:", row.names(tissue_matrix)[id], "\n")
+id <- 3
+cat("tissue name:", structure_info$snames[id], "\n")
 cutoffs <- quantile(tissue_matrix[id, ], probs = seq(0, 1, 0.025)) 
 selected <- (tissue_matrix[id, ] >= cutoffs[length(cutoffs)-1])  # greatest positive difference
 
@@ -275,14 +274,42 @@ up_reg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
                    ont       = "BP",
                    readable  = TRUE)
 
-dotplot(up_reg, font.size = 9, showCategory=30, label_format = 50) +
+dotplot(up_reg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 
 selected <- (tissue_matrix[id,] <= cutoffs[2]) # greatest negative difference
 down_reg <- enrichGO(gene    = unique(gene_info_inc[selected,3]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 60) +
+  theme(text=element_text(family="Times New Roman"))
+```
+
+```{r, fig.height=6, size="small"}
+idx <- order(apply(tissue_factor, 2, function(x) truncated_var(x)),decreasing=T)[1:3]
+tissue_matrix <- tissue_factor[,idx] %*% column_factor[idx, ]
+row.names(tissue_matrix) <- structure_info$snames
+id <- 2
+cat("tissue name:", structure_info$snames[id], "\n")
+cutoffs <- quantile(tissue_matrix[id, ], probs = seq(0, 1, 0.025)) 
+selected <- (tissue_matrix[id, ] >= cutoffs[length(cutoffs)-1])  # greatest positive difference
+
+# head(gene_info[selected,3])
+up_reg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
                    OrgDb     = 'org.Hs.eg.db',
                    ont       = "BP",
                    readable  = TRUE)
+
+dotplot(up_reg, font.size = 9, showCategory=30, label_format = 60) +
+  theme(text=element_text(family="Times New Roman"))
+
+selected <- (tissue_matrix[id,] <= cutoffs[2]) # greatest negative difference
+down_reg <- enrichGO(gene    = unique(gene_info_inc[selected,3]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
 
 dotplot(down_reg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
@@ -297,19 +324,22 @@ unique_cfd <- unique(confounder)
 
 distances <- sapply(seq(8), function(i){
   idx <- which(unique_cfd[,2] == i)
-  # mean((interactions[idx,1] - interactions[idx,2])^2)
-  t.test(interactions[idx,1], interactions[idx,2], paired = T)$p.value
+  mean((interactions[idx,1] - interactions[idx,2])^2)
+  # t.test(interactions[idx,1], interactions[idx,2], paired = T)$p.value
 })
-
-# then we can examine the tissue with the largest distance between dementia and control
-tissue_id <- which.min(distances)  
-cat("Tissue name:", structure_info$snames[tissue_id], "\n")
-
-cfd_id <- which(unique_cfd[,2] == tissue_id)
 ```
 
 ```{r, fig.height=6, size="small"}
-selected <- order(apply(interactions[cfd_id, ], 2, var), decreasing = TRUE)[1:3]
+
+# then we can examine the tissue with the largest distance between dementia and control
+# tissue_id <- which.min(distances) 
+tissue_id <- 4
+
+cat("Tissue name:", structure_info$snames[tissue_id], "\n")
+
+cfd_id <- which(unique_cfd[,2] == tissue_id)
+
+selected <- order(apply(interactions[cfd_id, ], 2, var), decreasing = TRUE)[1:4]
 
 interaction_matrix <- interactions[cfd_id, selected, drop = F] %*% column_factor[selected, , drop = F]
 diff <- interaction_matrix[2, ] - interaction_matrix[1,]
@@ -323,7 +353,45 @@ upreg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
                   ont       = "BP",
                   readable  = TRUE)
 
-dotplot(upreg, font.size = 8, showCategory=30, label_format = 70) + 
+dotplot(upreg, font.size = 9, showCategory=30, label_format = 70) + 
+  theme(text=element_text(family="Times New Roman"))
+
+# down-regulation, greatest negative difference
+selected <- (diff <= cutoffs[2])
+downreg <- enrichGO(gene    = unique(gene_info_inc[selected,3]),
+                    OrgDb     = 'org.Hs.eg.db',
+                    ont       = "BP",
+                    readable  = TRUE)
+
+dotplot(downreg, font.size = 9, showCategory=30, label_format = 50) + 
+  theme(text=element_text(family="Times New Roman"))
+```
+
+
+```{r, fig.height=6}
+# then we can examine the tissue with the largest distance between dementia and control
+tissue_id <- 7
+# tissue_id <- which.min(distances)  
+
+cat("Tissue name:", structure_info$snames[tissue_id], "\n")
+
+cfd_id <- which(unique_cfd[,2] == tissue_id)
+
+selected <- order(apply(interactions[cfd_id, ], 2, var), decreasing = TRUE)[1:7]
+
+interaction_matrix <- interactions[cfd_id, selected, drop = F] %*% column_factor[selected, , drop = F]
+diff <- interaction_matrix[2, ] - interaction_matrix[1,]
+
+cutoffs <- quantile(diff, probs = seq(0, 1, 0.025))
+
+# up-regulation, greatest positive difference
+selected <- (diff >= cutoffs[length(cutoffs)-1])  
+upreg <- enrichGO(gene      = unique(gene_info_inc[selected,3]),
+                  OrgDb     = 'org.Hs.eg.db',
+                  ont       = "BP",
+                  readable  = TRUE)
+
+dotplot(upreg, font.size = 9, showCategory=30, label_format = 70) + 
   theme(text=element_text(family="Times New Roman"))
 
 # down-regulation, greatest negative difference

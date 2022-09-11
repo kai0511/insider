@@ -1,0 +1,171 @@
+---
+title: "Brainspan glm interaction analysis"
+author: "ZHAO Kai"
+header-includes:
+  - \usepackage{xcolor}
+fontsize: 10pt
+mainfont: "Times New Roman"
+output: pdf_document
+---
+
+```{r, size="small"}
+suppressPackageStartupMessages({
+  require(ggplot2)
+  require(formatR)
+  require(knitr)
+  require(cluster)
+  require(factoextra)
+  require(dplyr)
+  require(RColorBrewer)
+  require(clusterProfiler)
+  require(org.Hs.eg.db)
+  require(enrichplot)
+  require(stringr)
+  require(forcats)
+  require(DOSE)
+  require(ggplot2)
+  require(hrbrthemes)
+  require(viridis)
+  require(reshape2)
+  require(gridExtra)
+  require(extrafont)
+})
+
+truncated_var <- function(x){
+    remove_idx <- c(which.max(x), which.min(x))
+    var(x[-remove_idx])
+}
+wrap_labal <- function(x, width = 60){ 
+    str_wrap(x, width=60)
+}
+```
+
+```{r}
+glm_interaction <- function(object, inc_cfd){
+
+  residual <- object[['data']]
+
+  confounder_num <- ncol(object[['confounder']])
+  for(i in 1:confounder_num){
+    sub_predictions <- object[['cfd_matrices']][[i]] %*% object[['column_factor']]
+    residual <- residual - sub_predictions[object[['confounder']][,i], ]
+  }
+  
+  column_factor <- object[['column_factor']]
+  train_indicator <- object[['train_indicator']]
+  
+  confounder <- object[['confounder']][, inc_cfd]
+  unique_cfd <- unique(confounder)
+
+  interaction_indicator <- rep(0, nrow(confounder))
+  for(k in 1:nrow(unique_cfd)){
+    selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
+    interaction_indicator[selected] <- k
+  }
+
+  unique_ita <- unique(interaction_indicator)
+  coeff_matrix <- matrix(0, nrow = length(unique_ita), ncol = nrow(column_factor))
+  pval_matrix <- matrix(0, nrow = length(unique_ita), ncol = nrow(column_factor))
+
+  for(i in unique_ita) {
+
+    ids <- which(interaction_indicator == i);
+
+    st_idx <- 1; ed_idx <- 1
+    nonzero_num <- length(ids) * ncol(column_factor);
+    outcomes = rep(0,nonzero_num);
+    features = matrix(0, nrow = nonzero_num, ncol = nrow(column_factor))
+
+    for(k in ids){
+      ed_idx = st_idx + ncol(column_factor) - 1;
+      features[st_idx:ed_idx, ] = t(column_factor);
+      outcomes[st_idx:ed_idx] = residual[k,];
+      st_idx = ed_idx + 1
+    }
+
+    data <- data.frame(response = outcomes, features)
+    fit <- glm(response ~ . - 1, family = gaussian(), data = data)
+    coeff_matrix[i,] <- unname(coefficients(fit))
+    pval_matrix[i,] <- coef(summary(fit))[,4]
+  }
+  return(list(unique_cfd, coeff_matrix, pval_matrix))
+}
+```
+
+```{r, size="small"}
+opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
+
+setwd("~/data/multidimensional_datasets/brainspan_genes_matrix_csv/")
+# load results for brain span
+load("~/data/Results/brainspan/insider_brainspan_fitted_object.RData")
+# load("~/data/Results/brainspan/insider_brainspan_R23_fitted_object.RData")
+attach(object) # attach it for easy syntax
+str(object) # show the structure of our result
+
+stage_factor <- cfd_matrices[[1]]
+tissue_factor <- cfd_matrices[[2]]
+# interactions <- cfd_matrices[[3]]
+
+# read meta information
+dic <- read.csv("~/data/Results/brainspan/dictionary.csv", stringsAsFactors = F)
+# obtain ensemble genes included in our study
+load("brainspan_dataset_annotated_fitered.RData")
+gene_id <- data.frame(ensembl_gene_id = colnames(data), stringsAsFactors =F)
+# match the included genes with meta information
+row_meta <- read.csv('rows_metadata.csv', stringsAsFactors = F)
+meta <- inner_join(gene_id, row_meta, by = "ensembl_gene_id")
+
+# prepare struture and stage names for naming corresponding latent factors
+structure <- unique(dic[,c(6, 9)])
+structure <- structure[order(structure[,2]),]
+stage <- unique(dic[,c(11, 12)])
+r_names <- apply(stage, 1, function(x) paste0(x[2], "_", trimws(x[1])))
+
+# name tissue_factor and stage_factor
+rownames(tissue_factor) <- structure[,1]
+rownames(stage_factor) <- r_names
+```
+
+## Explore the interaction between development stages and brain regions
+
+\textcolor{red}{Exploring the interaction is an important feature of our approach, so if possible we may carry out analysis on all possible combinations between brain regions and development stages and select reasonable results for interpretation.
+
+
+```{r, fig.height=7, size="small"}
+summary <- table(dic[,c(9, 11)])
+colnames(summary) <- r_names
+rownames(summary) <- structure[,1]
+print(summary)
+
+# interactions <- glm_interaction(object, c(1, 2))
+load("~/data/multidimensional_datasets/brainspan_genes_matrix_csv/glm_interaction.RData")
+
+unique_cfd <- interactions[[1]] 
+colnames(unique_cfd) <- c("period", "structure_id")
+
+definations <- data.frame(stage_names = r_names[unique_cfd[,1]], structure_names = structure[,1][unique_cfd[,2]])
+
+coeff_matrix <- interactions[[2]]
+pval_matrix <- interactions[[3]]
+
+significant_pvals <- apply(pval_matrix, 1, function(x) { sum(x <= 0.05)})
+
+cat("number of significant pvalues for each combination: ", significant_pvals, "\n")
+
+# interaction_indicator <- rep(0, nrow(object[['confounder']]))
+# for(k in 1:nrow(unique_cfd)){
+#   selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
+#   interaction_indicator[selected] <- k
+# }
+
+# intersted_idx <- which(apply(pval_matrix, 1, function(x) sum(x < 1e-8)) == 19)
+
+# confound_values <- (confounder[which(interaction_indicator == intersted_idx[3]), ])
+
+# stage_id <- r_names[confound_values[1]]
+# tissue_id <- structure[confound_values[2], 1]
+
+# metagene_id <- which.max(coeff_matrix[intersted_idx[3],])
+
+# which.min(coeff_matrix[intersted_idx[3],])
+```
