@@ -51,9 +51,7 @@ void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor
         }
 
     } else if(tuning == 0){
-        mat gram = c_factor * trans(c_factor);
-        mat Xtys = c_factor * trans(residual);
-
+        
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
         for(unsigned int i = 0; i < levels.size(); i++) {
             uvec non_zeros; 
@@ -62,12 +60,15 @@ void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor
 
             uvec ids = find(updating_confd == levels(i));
             for(unsigned int k = 0; k < ids.n_elem; k++){
-                XtX += gram;
-                Xty += Xtys.col(ids(k));
+                
+                mat X = c_factor.each_col() % trans(fixed_factor.row(selected(k)));
+                XtX += trans(X) * X;
+                Xty += c_factor * trans(residual.row(ids(k)));
             }
             XtX.diag() += lambda;
             updating_factor.row(levels(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
         }
+        
     }else{
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
@@ -103,7 +104,7 @@ void column_optimize(const mat& residual, const mat& indicator, const mat& row_f
             }
         }
 
-    }else if(tuning == 0){
+    }else if(tuning == 0) {
         
         mat XtX = trans(row_factor) * row_factor;
         mat Xty = trans(row_factor) * residual;
