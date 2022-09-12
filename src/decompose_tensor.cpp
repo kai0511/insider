@@ -59,6 +59,8 @@ void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor
             vec Xty = zeros<vec>(c_factor.n_rows);
 
             uvec ids = find(updating_confd == levels(i));
+            uvec selected = fixed_confd(ids) - 1;
+            
             for(unsigned int k = 0; k < ids.n_elem; k++){
                 
                 mat X = c_factor.each_col() % trans(fixed_factor.row(selected(k)));
@@ -68,7 +70,7 @@ void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor
             XtX.diag() += lambda;
             updating_factor.row(levels(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
         }
-        
+
     }else{
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
