@@ -8,10 +8,9 @@
 #include "utils.h"
 
 // [[Rcpp::export]]
-
 void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor, 
                   mat& updating_factor, const uvec& updating_confd, const mat& fixed_factor, const uvec& fixed_confd, 
-                  const double& lambda, const int& tuning, const int& n_cores = 10) {
+                  const double& lambda, const int& tuning, const unsigned int& n_cores = 10) {
     /*
         fix column parameters and update row factors 
     args:
@@ -77,6 +76,7 @@ void row_optimize(const mat& residual, const mat& indicator, const mat& c_factor
     }
 }
 
+// [[Rcpp::export]]
 void column_optimize(const mat& residual, const mat& indicator, const mat& row_factor, mat& c_factor, 
                      const double& lambda, const double& alpha, const int tuning, const int n_cores = 10, const double tol = 1e-5){
     
@@ -131,4 +131,105 @@ void column_optimize(const mat& residual, const mat& indicator, const mat& row_f
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
     }
+}
+
+// [[Rcpp::export]]
+List tensor_optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
+                     const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
+    
+    cout.precision(12);
+    double delta_loss;
+    unsigned int i, iter = 0, cfd_num = cfd_factors.size();
+    uvec train_idx, test_idx;
+    vec cfd_idx = linspace(0, cfd_num-1, cfd_num);
+    double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
+    mat residual, sub_matrix; 
+    mat row_factor = ones(data.n_rows, latent_dim), predictions = zeros(size(data));
+    List row_matrices;
+
+    // check whether the number of the confounding matrices is equal to the number of confounding indicators.
+    if(cfd_num != cfd_indicators.n_cols){
+        cout << "The number of confounding matrices should be the same the number of indicators." << endl;
+        exit(1);
+    } 
+
+    // put confounding matrices from Rcpp::List into arma::field
+    field<mat> cfd_matrices(cfd_num);
+    for(i = 0; i < cfd_num; i ++) {
+        Rcpp::NumericMatrix temp = cfd_factors[i];
+        cfd_matrices(i) = mat(temp.begin(), temp.nrow(), temp.ncol(), false);
+        row_factor %= cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+    }
+
+    // find the indices for training and testing elements 
+    train_idx = find(train_indicator);
+    test_idx = find(train_indicator == 0);
+
+    // check the fitting with initial values
+    predict(row_factor, column_factor, predictions);
+    residual = data - predictions;
+    evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+    loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
+
+    while(iter <= max_iter) {
+
+        if(iter % 10 == 0){
+            cout << "Iteration " << iter << " ---------------------------------" << endl;
+        }
+
+        // update all confonding matrices and compute row factor for updating column factor
+        row_factor.ones();
+        row_optimize(data, train_indicator, column_factor, cfd_matrices(0), cfd_indicators.col(0), cfd_matrices(1), cfd_indicators.col(1), lambda, tuning);
+        row_factor %= cfd_matrices(0).rows(cfd_indicators.col(0) - 1);
+
+        row_optimize(data, train_indicator, column_factor, cfd_matrices(1), cfd_indicators.col(1), cfd_matrices(0), cfd_indicators.col(0), lambda, tuning);
+        row_factor %= cfd_matrices(1).rows(cfd_indicators.col(1) - 1);
+
+        // update columm_factor
+        column_optimize(data, train_indicator, row_factor, column_factor, lambda, alpha, tuning, 30, sub_tol * decay);
+        predict(row_factor, column_factor, predictions);
+        residual = data - predictions;
+
+        // check the fitting every 10 steps
+        if(iter % 10 == 0){
+            pre_loss = loss;
+            evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
+            loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
+            
+            delta_loss = pre_loss - loss;
+            cout << "Delta loss for iter " << iter << ":" << delta_loss << endl;
+
+            if(delta_loss/1000 <= 1e-6){
+                decay = 1e-6;
+            }else if(delta_loss/1000 <= 1e-5){
+                decay = 1e-5;
+            }else if(delta_loss/1000 <= 1e-4){
+                decay = 1e-4;
+            }else if(delta_loss/1000 <= 1e-3){
+                decay = 1e-3;
+            }else if(delta_loss/1000 <= 1e-2){
+                decay = 1e-2;
+            }else if(delta_loss/1000 <= 1e-1){
+                decay = 1e-1;
+            }else{
+                decay = 1.0;
+            }
+
+            if((pre_loss - loss)/pre_loss < global_tol){
+                break;
+            }
+        }
+        iter++;
+    }
+    
+    // put the updated confounding matrices into a R list
+    for(i = 0; i < cfd_num; i ++) {
+        row_matrices["factor" + std::to_string(i)] = cfd_matrices(i);
+    }
+
+    return List::create(Named("row_matrices") = row_matrices,
+                        Named("column_factor") = column_factor, 
+                        Named("train_rmse") = train_rmse, 
+                        Named("test_rmse") = test_rmse, 
+                        Named("loss") = loss);
 }
