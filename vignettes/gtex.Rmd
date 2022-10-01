@@ -166,3 +166,140 @@ upreg <- enrichGO(gene       = unique(meta[selected_idx,1]),
 dotplot(upreg, font.size = 9, showCategory=30, label_format = 60) +
   theme(text=element_text(family="Times New Roman"))
 ```
+
+## metagene characterize the difference in brain function between genders
+
+```{r, fig.height=6, size="small"}
+idx <- 11 # ATP systhesis
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 5 # immune related biological processes
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+# selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 5 # myelination and gliogenesis
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+```
+
+## metagene characterize functions of brain regions
+
+```{r, fig.height=6, size="small"}
+row.names(tissue_factor) <- unique(mapping[,c(2,4)])[[1]]
+
+idx <- 12 # BPs downregulated in spinal cord (cervical c-1) 
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman")) 
+
+idx <- 12 # BPs upregulated in spinal cord
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+# selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 4 # BPs upregulated in Hypothalamus
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman")) 
+
+idx <- 6 # BPs upregulated in Hippocampus
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman")) 
+
+idx <- 8 # BPs upregulated in Cerebellum
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+
+idx <- 3 # BPs upregulated in basal ganglia
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+# selected <- (column_factor[idx, ] <= cutoffs[2])
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,1]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     keyType    = 'ENSEMBL',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+```
