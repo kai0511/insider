@@ -17,7 +17,3 @@ optimize <- function(data, cfd_factors, column_factor, cfd_indicators, train_ind
     .Call(`_insider_optimize`, data, cfd_factors, column_factor, cfd_indicators, train_indicator, latent_dim, lambda, alpha, tuning, global_tol, sub_tol, max_iter)
 }
 
-proximal_gradient <- function(X, y, wstart, lambda, alpha, XtX, Xty, tol = 1e-5, max_iter = 100L) {
-    .Call(`_insider_proximal_gradient`, X, y, wstart, lambda, alpha, XtX, Xty, tol, max_iter)
-}
-

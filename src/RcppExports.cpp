@@ -88,32 +88,12 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// proximal_gradient
-vec proximal_gradient(const mat& X, const vec& y, const vec& wstart, const double& lambda, const double& alpha, const mat& XtX, const vec& Xty, const double& tol, const int& max_iter);
-RcppExport SEXP _insider_proximal_gradient(SEXP XSEXP, SEXP ySEXP, SEXP wstartSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP XtXSEXP, SEXP XtySEXP, SEXP tolSEXP, SEXP max_iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const vec& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const vec& >::type wstart(wstartSEXP);
-    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const mat& >::type XtX(XtXSEXP);
-    Rcpp::traits::input_parameter< const vec& >::type Xty(XtySEXP);
-    Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(proximal_gradient(X, y, wstart, lambda, alpha, XtX, Xty, tol, max_iter));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_insider_coordinate_descent", (DL_FUNC) &_insider_coordinate_descent, 8},
     {"_insider_strong_coordinate_descent", (DL_FUNC) &_insider_strong_coordinate_descent, 8},
     {"_insider_strong_feature_sign", (DL_FUNC) &_insider_strong_feature_sign, 8},
     {"_insider_optimize", (DL_FUNC) &_insider_optimize, 12},
-    {"_insider_proximal_gradient", (DL_FUNC) &_insider_proximal_gradient, 9},
     {NULL, NULL, 0}
 };
 
