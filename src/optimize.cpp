@@ -97,7 +97,8 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             uvec selected = find(indicator.col(i));
             mat feature = row_factor.rows(selected);
             // mat XtX = sum(feature_space.slices(selected, 2));
-            mat XtX = gram - sum(feature_space.slices(find(indicator.col(i) == 0)), 2);
+            uvec unselected = find(indicator.col(i) == 0);
+            mat XtX = gram - sum(feature_space.slices(unselected), 2);
             vec outcome = residual.col(i);
             outcome = outcome(selected);
             vec Xty = trans(feature) * outcome;
