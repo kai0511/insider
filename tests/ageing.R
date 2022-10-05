@@ -27,5 +27,6 @@ confounders <- as.matrix(dataset[ ,1:end_idx])
 
 object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10, sub_tol = 1e-5, tuning_iter = 30)
 # object <- tune(object, as.integer(num_factors), lambda = seq(1, 20, 1), alpha = c(0.2, 0.3, 0.4, 0.5))
-object <- fit(object, as.integer(num_factors), lambda = lambda, alpha = alpha)
-save(object, file = paste0("insider_ageing_R", num_factors, "_fitted_object.RData"))
+object <- tune(object, as.integer(seq(10, 25, by = 1)), lambda = 0.1, alpha = 0.1)
+# object <- fit(object, as.integer(num_factors), lambda = lambda, alpha = alpha)
+# save(object, file = paste0("insider_ageing_R", num_factors, "_fitted_object.RData"))
