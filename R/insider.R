@@ -14,7 +14,7 @@
 #'
 #' @examples object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10)
 #' 
-insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
+insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
 
     # split data into two pieces
     dataset <- ratio_splitter(data, ratio = split_ratio)
@@ -28,19 +28,60 @@ insider <- function(data, confounder, interaction_idx, split_ratio = 0.1, global
         if(max(interaction_idx) > ncol(confounder)){
             stop("The interaction_idx is out of the range of confounder!")
         }
-
+        
         unique_cfd <- unique(confounder[, interaction_idx])
-
         interaction_indicator <- rep(0, nrow(confounder))
         for(k in 1:nrow(unique_cfd)){
             selected <- apply(confounder[, interaction_idx], 1, function(x) all(x == unique_cfd[k,]))
             interaction_indicator[selected] <- k
         }
+        object[['confounder']] <- cbind(confounder, interaction_indicator)
+        
+    }else if(is.null(interaction_idx)){
+        object[['confounder']] <- cbind(confounder)
     }else{
         stop("The interaction_idx should be integers and its length must be greater than or equal to 2!")
     }
-    
-    object[['confounder']] <- cbind(confounder, interaction_indicator)
+
+    # generate indicator for easy operation in C++
+    object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
+
+    params <- list(global_tol = global_tol, sub_tol = sub_tol,
+                   tuning_iter = tuning_iter, max_iter = max_iter)
+
+    object[['params']] <- params
+
+    return(object)
+}
+
+insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30, max_iter = 50000){
+
+    # split data into two pieces
+    dataset <- ratio_splitter(data, ratio = split_ratio)
+
+    # create insider class
+    object <- structure(list(), class = "insider")
+    object[['data']] <- data
+
+    if(is.integer(interaction_idx) & (length(interaction_idx) > 1)){
+        
+        if(max(interaction_idx) > ncol(confounder)){
+            stop("The interaction_idx is out of the range of confounder!")
+        }
+        
+        unique_cfd <- unique(confounder[, interaction_idx])
+        interaction_indicator <- rep(0, nrow(confounder))
+        for(k in 1:nrow(unique_cfd)){
+            selected <- apply(confounder[, interaction_idx], 1, function(x) all(x == unique_cfd[k,]))
+            interaction_indicator[selected] <- k
+        }
+        object[['confounder']] <- cbind(confounder, interaction_indicator)
+        
+    }else if(is.null(interaction_idx)){
+        object[['confounder']] <- cbind(confounder)
+    }else{
+        stop("The interaction_idx should be integers and its length must be greater than or equal to 2!")
+    }
 
     # generate indicator for easy operation in C++
     object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)

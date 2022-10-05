@@ -82,6 +82,8 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
                   const double& lambda, const double& alpha, const int tuning, const int n_cores = 10, const double tol = 1e-5){
     
     if(tuning == 1){
+        
+        mat gram = trans(row_factor) * row_factor;
 
         cube feature_space(c_factor.n_rows, c_factor.n_rows, residual.n_rows);
         for(unsigned int i = 0; i < row_factor.n_rows; i++){
@@ -92,11 +94,12 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
         #endif
         for(unsigned int i = 0; i < residual.n_cols; i++) {
-            uvec row_selected = find(indicator.col(i));
-            mat feature = row_factor.rows(row_selected);
-            mat XtX = sum(feature_space.slices(row_selected), 2);
+            uvec selected = find(indicator.col(i));
+            mat feature = row_factor.rows(selected);
+            // mat XtX = sum(feature_space.slices(selected, 2));
+            mat XtX = gram - sum(feature_space.slices(find(indicator.col(i) == 0)), 2);
             vec outcome = residual.col(i);
-            outcome = outcome(row_selected);
+            outcome = outcome(selected);
             vec Xty = trans(feature) * outcome;
 
             if(alpha == 0){

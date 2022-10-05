@@ -32,6 +32,7 @@ suppressPackageStartupMessages({
   require(reshape2)
   require(gridExtra)
   require(extrafont)
+  require(tidyverse)
 })
 
 truncated_var <- function(x){
@@ -47,7 +48,7 @@ wrap_labal <- function(x, width = 60){
 ```{r, size="small"}
 opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
 
-setwd("~/data/multidimensional_datasets/brainspan_genes_matrix_csv/")
+setwd("/Users/zhaokai/data/bulk RNA-seq datasets/brainspan_genes_matrix_csv")
 # load results for brain span
 load("~/data/Results/brainspan/insider_brainspan_fitted_object.RData")
 # load("~/data/Results/brainspan/insider_brainspan_R23_fitted_object.RData")
@@ -99,8 +100,14 @@ The plot below show the trajectory of the selected metagene cross all developmen
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(100)), fig.height=5, fig.width=7}
 loadfonts(quiet = T)
-result <- data.frame(stage = r_names, levels = stage_factor[, metagene_id], stringsAsFactors = F)
-result$stage <- factor(r_names, levels = r_names)
+result <- data.frame(stage = r_names, levels = stage_factor[, c(2, metagene_id, 17)], stringsAsFactors = F)
+colnames(result)[2:4] <- c("metagene_2", "metagene_16", "metagene_17")
+
+long_result <- melt(result, id="stage")
+colnames(long_result)[2] <- "metagene"
+levels(long_result[[2]]) <- c(2, 16, 17)
+long_result$stage <- factor(r_names, levels = r_names)
+
 # ggplot(data = result, aes(x = stage, y = levels, group = 1)) +
 #     geom_line(linetype = "dashed") +
 #     geom_point() +
@@ -109,13 +116,21 @@ result$stage <- factor(r_names, levels = r_names)
 #           axis.title.y = element_text(size=10),
 #           text=element_text(size=10, family="Times New Roman"), 
 #           axis.text.x = element_text(size=10,angle = 45, vjust = 1, hjust=1))
-ggplot(data = result, aes(x = stage, y = levels, group = 1)) + 
-  scale_color_viridis(discrete = T) + 
+
+ggplot(data = long_result, aes(x=stage, y=value, colour=metagene, group = metagene)) + 
+  geom_line(size = 0.8) +
   scale_x_discrete(labels=2:14)+
-  geom_line() + 
   theme_ipsum(base_family = "Times New Roman", base_size= 14, axis_title_size = 16) + 
   xlab("Stages") + ylab("Levels") 
-  #axis.text.x = element_text(size=10,angle = 45, vjust = 1, hjust=1))
+
+result <- data.frame(stage = r_names, levels = stage_factor[, 14], stringsAsFactors = F)
+
+ggplot(data = result, aes(x = stage, y = levels, group = 1)) +
+    geom_line(size = 0.8, color = "darkblue") +
+    scale_x_discrete(labels=2:14)+
+    xlab("Stages") + ylab("Levels") + ylim(-15,0)+ 
+    theme_ipsum(base_family = "Times New Roman", base_size= 14, axis_title_size = 16) + 
+  xlab("Stages") + ylab("Levels") 
 ```
 
 Then, we investigated the pathway enriched for top 2.5% genes that up-regulates and down-regulates this metagene.
@@ -141,6 +156,52 @@ downreg <- enrichGO(gene = unique(meta[selected,5]),
                     ont = "BP",
                     readable = TRUE)
 dotplot(downreg, font = 9, showCategory=30, label_format = 60) + 
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 2
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 60) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 17 # cell defferentiation and DNA replication (up) cognition (down)
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
   theme(text=element_text(family="Times New Roman"))
 ```
 
@@ -270,11 +331,12 @@ ac_vec
 hc3 <- agnes(tissue_factor, method = unname(m[which(ac_vec == max(ac_vec))]))
 pltree(hc3, cex = 0.6, hang = -1, main = "Dendrogram of tissue representations")
 ```
+
 Second, we explore the pathways that contribute the most to the expression difference across different brain structures. This analysis can identify biological processes that partially contribute to the difference across different brain structures.
 
 \textcolor{red}{The second kind of analysis only can partial explain the pathways that signal differently across all tissues in our study, so expanding it with other two or three metagenes with high variance is enough.}
 
-```{r, tidy=TRUE, tidy.opts=list(width.cutoff=I(120)), fig.height=7, size="small"}
+```{r, fig.height=6, size="small", tidy=TRUE, tidy.opts=list(width.cutoff=I(120))}
 # tiss_var <- apply(tissue_factor, 2, var)
 tiss_var <- apply(tissue_factor, 2, function(x) truncated_var(x))
 
@@ -289,7 +351,131 @@ upreg <- enrichGO(gene = unique(meta[selected,5]),
                   OrgDb = 'org.Hs.eg.db',
                   ont = "BP",
                   readable = TRUE)
-dotplot(upreg, font = 9, showCategory=30, label_format = 60) + 
+dotplot(upreg, font = 9, showCategory=30, label_format = 80) + 
   theme(text=element_text(family="Times New Roman"))
 ```
 
+## Metagenes uncover the biological BPs distinct to specific development stage
+
+```{r, fig.height=6, size="small"}
+# ------------------ functions of development stage -------------------------
+
+
+idx <- 4
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 5  # muscle tissue development
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 60) +
+  theme(text=element_text(family="Times New Roman"))
+
+
+idx <- 8 # fatty acid, linoleic acid, steroid, and cholestrol metabolic, immune, nutrition (up), insulin and hormone secretion (down)
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+```
+
+## Metagenes characterize development of brain regions
+
+```{r, fig.height=6, size="small"}
+# ------------------ functions of brain regions -------------------------
+idx <- 1 # striatum for cognition, dopamine, monoamine, catecholamines (up)
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx,] >= cutoffs[length(cutoffs)-1]) # greatest negative difference
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 3 # mediodorsal nucleus of thalamus for heart contraction
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 7 # hippocampal formation for snaptic function and activities
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 12 # # cerebellum for eye visual, sensory system 
+
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+
+idx <- 13  # cerebellar cortex for kindney function
+cutoffs <- quantile(column_factor[idx, ], probs = seq(0, 1, 0.025))
+selected <- (column_factor[idx, ] <= cutoffs[2])
+
+down_reg <- enrichGO(gene      = unique(meta[selected,5]),
+                     OrgDb     = 'org.Hs.eg.db',
+                     ont       = "BP",
+                     readable  = TRUE)
+
+dotplot(down_reg, font.size = 9, showCategory=30, label_format = 80) +
+  theme(text=element_text(family="Times New Roman"))
+```
