@@ -173,7 +173,7 @@ barplot(cluster_tbi, main="number of observations",
 We can also investigate biological processes we are interested in with our results. For example, we explored the mechanism of dementia with the disease and gene factors. We obtained the expression profiles for the dementia and control, extracted the genes with greatest postive difference between them, and examine the biological processes enriched by those genes. 
 
 ```{r, fig.height=6, size="small"}
-idx <- order(apply(disease_factor, 2, function(x) abs(x[1] - x[2])), decreasing = T)[1:3]
+idx <- order(apply(disease_factor, 2, function(x) abs(x[1] - x[2])), decreasing = T)[1:2]
 disease_matrix <- disease_factor[,idx, drop = F] %*% column_factor[idx, , drop = F]
 diff <- disease_matrix[2,] - disease_matrix[1,]
 
@@ -199,10 +199,18 @@ loadfonts(quiet = T)
 
 structure_names <- c("TC left", "FWM right", "FWM left", "HPC right", "PC right", "TC right", "HPC left", "PC left")
 
-# result <- as.data.frame(upreg)
-# gene_names <- unlist(strsplit(result[1,8], split = "/"))
+# result <- as.data.frame(down_reg)
+# selected_result <- d[c(11, 16, 24, 29, 30),c(2,8)]
 
-selected <- c("PLEKHG5", "NCS1", "GRIK5", "NRGN")
+# selected <- unique(unlist(strsplit(selected_result[,2], split = "/")))
+
+# selected <- c("PLEKHG5", "NCS1", "GRIK5", "NRGN")
+selected <- c("NRGN", "CAMK2A", "SHISA6")
+
+# inter_profiles <- interactions %*% column_factor
+# inter_var <- as.vector(apply(inter_profiles, 2, var))
+# ord <- order(inter_var, decreasing = T)
+# selected <- gene_info_inc[ord[1:50],4]
 
 row_ids <- unlist(sapply(selected, function(x) which(gene_info_inc[[4]] == x)))
 data <- cbind(pheno, structure_names[tissue], dataset[,row_ids])
@@ -214,45 +222,46 @@ test_results <- sapply(3:ncol(data), function(j){
     pvalues <- sapply(structure_names, function(i) t.test(data[data$tissue == i, j] ~ data$pheno[data$tissue == i])$p.value)
 })
 
+
 simes_pvalues <- apply(test_results, 2, function(x)simes.test(x))
 names(simes_pvalues) <- names(row_ids)
 
 colnames(test_results) <- names(row_ids)
 rownames(test_results) <- structure_names
 
-p1 <- ggplot(data, aes(x=tissue, y=PLEKHG5, fill=pheno)) + 
+p1 <- ggplot(data, aes(x=tissue, y=NRGN, fill=pheno)) +
     scale_color_viridis(discrete = TRUE) +
     geom_boxplot() + 
-    ggtitle("PLEKHG5 expression") +
+    ggtitle("NRGN expression") +
     xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
-p2 <- ggplot(data, aes(x=tissue, y=NCS1, fill=pheno)) + 
-    scale_color_viridis(discrete = TRUE) +
-    geom_boxplot() + 
-    ggtitle("NCS1 expression") +
-    xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
-
-p3 <- ggplot(data, aes(x=tissue, y=GRIK5, fill=pheno)) +
-    scale_color_viridis(discrete = TRUE) +
-    geom_boxplot() + 
-    ggtitle("GRIK5 expression") +
-    xlab("") + ylab("Levels") +
-    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
-
-# p4 <- ggplot(data, aes(x=tissue, y=NRGN, fill=pheno)) +
+# p1 <- ggplot(data, aes(x=tissue, y=MT3, fill=pheno)) + 
 #     scale_color_viridis(discrete = TRUE) +
 #     geom_boxplot() + 
-#     ggtitle("NRGN expression") +
+#     ggtitle("MT3 expression") +
 #     xlab("") + ylab("Levels") +
-#     theme_ipsum(base_family = "Times New Roman", base_size= 12, plot_title_face = "bold", axis_title_size = 16, plot_title_size = 18) +
+#     theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
 #     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
 
-grid.arrange(p1, p2, p3, nrow=1, ncol=3) 
+p2 <- ggplot(data, aes(x=tissue, y=CAMK2A, fill=pheno)) + 
+    scale_color_viridis(discrete = TRUE) +
+    geom_boxplot() + 
+    ggtitle("CAMK2A expression") +
+    xlab("") + ylab("Levels") +
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
+
+p3 <- ggplot(data, aes(x=tissue, y=SHISA6, fill=pheno)) +
+    scale_color_viridis(discrete = TRUE) +
+    geom_boxplot() + 
+    ggtitle("SHISA6 expression") +
+    xlab("") + ylab("Levels") +
+    theme_ipsum(base_family = "Times New Roman", base_size= 12, axis_title_size = 14, plot_title_size = 15) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1), plot.margin = unit(c(5, 2, 5, 2), "pt"))
+
+grid.arrange(p1, p2, p3, nrow=1, ncol=3)
 ```
 
 Here is a another pieces of code to demenstrate molecular functions of genes with the largest effects in different brain structures. 
