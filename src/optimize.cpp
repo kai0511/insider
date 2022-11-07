@@ -203,21 +203,18 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         // update all confonding matrices
         gram = column_factor * column_factor.t();
         for(i = 0; i < cfd_num; i++){
-            // sub_matrix = cfd_matrices(i) * column_factor;
-            // residual += sub_matrix.rows(cfd_indicators.col(i) - 1);
             residual += index_matrices(i) * cfd_matrices(i) * column_factor;
-
             optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda, tuning);
-
-            // sub_matrix = cfd_matrices(i) * column_factor;
-            // residual -= sub_matrix.rows(cfd_indicators.col(i) - 1);
-            residual += index_matrices(i) * cfd_matrices(i) * column_factor;
+            if(i != cfd_num - 1){
+                residual += index_matrices(i) * cfd_matrices(i) * column_factor;
+            }
         }
 
         // compute row_factor
         row_factor.zeros();
         for(i = 0; i < cfd_num; i ++) {
-            row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+            // row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+            row_factor += index_matrices(i) * cfd_matrices(i);
         }
 
         // update columm_factor
