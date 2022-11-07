@@ -68,7 +68,7 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
                 Xty += Xtys.col(ids(k));
             }
             XtX.diag() += lambda;
-            
+
             updating_factor.row(seq(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
         }
 
@@ -150,7 +150,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     unsigned int i, iter = 0, cfd_num = cfd_factors.size();
     uvec train_idx, test_idx;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
-    mat residual, sub_matrix; 
+    mat gram, residual, sub_matrix; 
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
 
