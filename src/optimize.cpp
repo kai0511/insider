@@ -60,9 +60,9 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
             uvec ids = find(updating_confd == seq(i));
             mat XtX = ids.n_elem * gram;
-            vec Xty = sum(Xtys.cols(ids), 1)
             XtX.diag() += lambda;
-
+            vec Xty = sum(Xtys.cols(ids), 1);
+            
             updating_factor.row(seq(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
         }
 
