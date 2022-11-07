@@ -53,20 +53,14 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
     }else if(tuning == 0){
 
-        // mat gram = c_factor * trans(c_factor);
         mat Xtys = c_factor * trans(residual);
 
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
         for(unsigned int i = 0; i < seq.size(); i++) {
 
-            uvec non_zeros; 
-            vec Xty = zeros<vec>(c_factor.n_rows);
             uvec ids = find(updating_confd == seq(i));
-
             mat XtX = ids.n_elem * gram;
-            for(unsigned int k = 0; k < ids.n_elem; k++){
-                Xty += Xtys.col(ids(k));
-            }
+            vec Xty = sum(Xtys.cols(ids), 1)
             XtX.diag() += lambda;
 
             updating_factor.row(seq(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
@@ -97,16 +91,13 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         for(unsigned int i = 0; i < residual.n_cols; i++) {
             uvec selected = find(indicator.col(i));
             mat feature = row_factor.rows(selected);
-            // mat XtX = sum(feature_space.slices(selected), 2);
-            uvec unselected = find(indicator.col(i) == 0.0);
-            mat XtX = sum(feature_space.slices(unselected), 2);
+            mat XtX = sum(feature_space.slices(find(indicator.col(i) == 0.0)), 2);
             XtX = gram - XtX;
             vec outcome = residual.col(i);
             outcome = outcome(selected);
             vec Xty = trans(feature) * outcome;
 
             if(alpha == 0){
-                // mat left_matrix = XtX + lambda * eye(c_factor.n_rows, c_factor.n_rows);
                 XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
@@ -119,22 +110,18 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         mat XtX = trans(row_factor) * row_factor;
         mat Xty = trans(row_factor) * residual;
 
-        if(alpha == 0){
-            XtX.diag() += lambda; 
-        }
-
         #if defined(_OPENMP)
             #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
         #endif
         for(unsigned int i = 0; i < residual.n_cols; i++) {
             
             if(alpha == 0){
+                XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
                 c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i), lambda, alpha, XtX, Xty.col(i), tol);
             }
         }
-
     } else{
         cout << "Parameter tuning should be either 0 or 1!" << endl;
         exit(1);
