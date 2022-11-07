@@ -13,7 +13,7 @@ using Rcpp::List;
 using Rcpp::Named;
 
 void optimize_row(const mat& residual, const mat& indicator, mat& updating_factor, const mat& c_factor, 
-                  const uvec& updating_confd, const double lambda, const int tuning, const int n_cores = 10){
+                  const uvec& updating_confd, const mat& gram, const double lambda, const int tuning, const int n_cores = 10){
     /*
         fix column parameters and update row factors 
     args:
@@ -28,7 +28,7 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
         for(unsigned int i = 0; i < seq.size(); i++) {
 
-            uvec non_zeros; 
+            uvec non_zeros, zero_idx; 
             mat feaures, XtX = zeros(c_factor.n_rows, c_factor.n_rows);
             vec outcome, Xty = zeros<vec>(c_factor.n_rows);
 
@@ -36,13 +36,15 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
             for(unsigned int k = 0; k < ids.n_elem; k++){
                 non_zeros = find(trans(indicator.row(ids(k))));
-                feaures = c_factor.cols(non_zeros); 
+                zero_idx = find(trans(indicator.row(ids(k))) == 0);  
+                // feaures = c_factor.cols(non_zeros); 
 
                 outcome = trans(residual.row(ids(k)));
                 outcome = outcome(non_zeros);
                 
-                XtX += feaures * trans(feaures);
-                Xty += feaures * outcome;
+                // XtX += feaures * trans(feaures);
+                XtX += gram - c_factor.cols(zero_idx) * trans(c_factor.cols(zero_idx));
+                Xty += c_factor.cols(non_zeros) * outcome;
             }
             
             XtX.diag() += lambda;
@@ -51,23 +53,22 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
     }else if(tuning == 0){
 
-        mat gram = c_factor * trans(c_factor);
+        // mat gram = c_factor * trans(c_factor);
         mat Xtys = c_factor * trans(residual);
 
         #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 1)
         for(unsigned int i = 0; i < seq.size(); i++) {
 
             uvec non_zeros; 
-            mat XtX = zeros(c_factor.n_rows, c_factor.n_rows);
             vec Xty = zeros<vec>(c_factor.n_rows);
-
             uvec ids = find(updating_confd == seq(i));
+
+            mat XtX = ids.n_elem * gram;
             for(unsigned int k = 0; k < ids.n_elem; k++){
-                XtX += gram;
                 Xty += Xtys.col(ids(k));
             }
-            
             XtX.diag() += lambda;
+            
             updating_factor.row(seq(i) - 1) = trans(solve(XtX, Xty, solve_opts::likely_sympd));
         }
 
@@ -159,12 +160,28 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         exit(1);
     } 
 
-    // put confounding matrices from Rcpp::List into arma::field
+    // move confounding matrices from Rcpp::List into arma::field
     field<mat> cfd_matrices(cfd_num);
     for(i = 0; i < cfd_num; i ++) {
         Rcpp::NumericMatrix temp = cfd_factors[i];
         cfd_matrices(i) = mat(temp.begin(), temp.nrow(), temp.ncol(), false);
         row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+    }
+
+    // place indices of confounders into arma::field for computational consideration
+    field<mat> index_matrices(cfd_num);
+    field<vec> confd_counts(cfd_num);
+    for(i = 0; i < cfd_num; i ++) {
+        uvec levels = unique(cfd_indicators.col(i));
+        mat cfd_idx = zeros(cfd_indicators.n_rows, levels.n_elem);
+
+        for(unsigned int k = 0; k < levels.n_elem; k++) {
+            vec tmp = cfd_idx.col(k);
+            tmp.elem(find(cfd_indicators.col(i) == levels(k))).ones();
+            cfd_idx.col(k) = tmp;
+        }
+        index_matrices(i) = cfd_idx;
+        confd_counts(i) = trans(sum(cfd_idx));
     }
 
     // find the indices for training and testing elements 
@@ -184,14 +201,17 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         }
 
         // update all confonding matrices
+        gram = column_factor * column_factor.t();
         for(i = 0; i < cfd_num; i++){
-            sub_matrix = cfd_matrices(i) * column_factor;
-            residual += sub_matrix.rows(cfd_indicators.col(i) - 1);
+            // sub_matrix = cfd_matrices(i) * column_factor;
+            // residual += sub_matrix.rows(cfd_indicators.col(i) - 1);
+            residual += index_matrices(i) * cfd_matrices(i) * column_factor;
 
-            optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), lambda, tuning);
+            optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda, tuning);
 
-            sub_matrix = cfd_matrices(i) * column_factor;
-            residual -= sub_matrix.rows(cfd_indicators.col(i) - 1);
+            // sub_matrix = cfd_matrices(i) * column_factor;
+            // residual -= sub_matrix.rows(cfd_indicators.col(i) - 1);
+            residual += index_matrices(i) * cfd_matrices(i) * column_factor;
         }
 
         // compute row_factor
