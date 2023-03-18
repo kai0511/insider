@@ -167,8 +167,8 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             tmp.elem(find(cfd_indicators.col(i) == levels(k))).ones();
             cfd_idx.col(k) = tmp;
         }
-        index_matrices(i) = cfd_idx;
-        confd_counts(i) = trans(sum(cfd_idx));
+        index_matrices(levels(i)-1) = cfd_idx;
+        confd_counts(levels(i)-1) = trans(sum(cfd_idx));
     }
 
     // find the indices for training and testing elements 
