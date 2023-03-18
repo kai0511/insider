@@ -8,23 +8,22 @@ require(insider)
 
 # options(error = dump_and_quit)
 
-num_factors <- 23 
+num_factors <- 3
 
-# regularization for iMF
-lambda <- 6  # original value 33.7777777777778
-alpha <- 0.4 # original 0.35
+# regularization for insider
+lambda <- 120  # original value 33.7777777777778
+alpha <- 0.9 # original 0.35
 
-setwd('../results/brainspan/')
-load('~/data/multi_dimensional_datasets/brainspan_dataset_annotated_fitered.RData')
+setwd('~/git_repositories/insider/results/PsyEncode/')
+load('~/data/PsyEncode/PEC_Gene_expression_matrix_for_insider.RData')
 dataset[is.na(dataset)] <- 0
 
-end_idx <- 2
+end_idx <- 3
 confounders <- dataset[ ,1:end_idx]
-confounders[, 1] <- confounders[, 1] - 1
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
 
 object <- insider(data, as.matrix(confounders), global_tol = 1e-10)
-# object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(1, 50, by = 5), alpha = seq(0.1, 0.6, by = 0.1))
+# object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(90, 500, by = 10), alpha = 0.9)
 object <- fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
-# save(object, file = paste0("insider_brainspan_R", num_factors, "_fitted_object.RData"))
+save(object, file = paste0("insider_psyencode_R", num_factors, "_fitted_object.RData"))
  

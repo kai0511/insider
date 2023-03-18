@@ -112,7 +112,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
         stop("TUNNING: The element of latent_dimension, lambda, and alpha should be integer, numeric, and numeric.")
     }
 
-    if((length(latent_dimension) <= 1) & (length(lambda) <= 1 | length(alpha) <= 1)){
+    if((length(latent_dimension) <= 1) & (length(lambda) <= 1 & length(alpha) <= 1)){
         stop("TUNNING: The length of either latent_dimension or lambda and alpha should be greater than 1.")
     }
 
@@ -139,7 +139,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
             fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                    latent_rank, 0.1, 0.01, 1, global_tol, sub_tol, tuning_iter);
+                    latent_rank, 0.1, 0.1, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(rank_tuning)){
                 rank_tuning <- c(latent_rank, fitted_obj$train_rmse, fitted_obj$test_rmse)
