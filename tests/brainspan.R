@@ -23,8 +23,8 @@ confounders <- dataset[ ,1:end_idx]
 confounders[, 1] <- confounders[, 1] - 1
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)
 
-object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10)
+object <- insider(data, as.matrix(confounders), global_tol = 1e-10)
 # object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(1, 50, by = 5), alpha = seq(0.1, 0.6, by = 0.1))
 object <- fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
-save(object, file = paste0("insider_brainspan_R", num_factors, "_fitted_object.RData"))
+# save(object, file = paste0("insider_brainspan_R", num_factors, "_fitted_object.RData"))
  
