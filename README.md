@@ -26,11 +26,22 @@ R CMD INSTALL insider_1.0.tar.gz
 ## Usage
 
 * Data preparation
+Here we use a small proportion of the ageing dataset (377*44477) as data matrix for tony example. For demonstration purpose, the dimension of example data matrix is 377 by 5000. One 
 ```{r}
 require(insider)
 
-load('ageing_example_data.RData')
-dataset <- dataset[,-1]   # The first column is rnaseq_profile_id
+load('ageing_example_data.RData')   # load the data and the exact path for the example data matrix depends.
+
+head(dataset[,1:5])
+  rnaseq_profile_id pid sid did X499304660
+1         496100536   1   4  71  0.0000000
+2         496100556   1   6  71  0.0000000
+3         496100513   1   6  69  0.0000000
+4         496100514   1   2  69  0.0000000
+5         496100520   1   4  69  0.2626623
+6         496100524   1   5  69  0.0000000
+
+dataset <- dataset[,-1]   # The first column is rna-seq_profile_id
 
 end_idx <- 3  # The end index for covariate matrix
 data[is.na(data)] <- 0 # cast NAs to zeros
