@@ -48,7 +48,7 @@ data[is.na(data)] <- 0 # cast NAs to zeros
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)  # log transformed expression data matrix
 
 # In the example data, there are three biological variables: pid (phenotype id), sid (brain structure id), and did (donor id).
-confounders <- as.matrix(dataset[ ,1:end_idx])   # matrix for covariates ()
+confounders <- as.matrix(dataset[ ,1:end_idx])   # matrix for biological variables
 ```
 
 * Create INSIDER object
