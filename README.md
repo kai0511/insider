@@ -60,7 +60,7 @@ It needs the following arguments:
 2. *confounder*: A confounder matrix;
 3. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between phenotype and brain structures, with the above example data;
 4. *split_ratio*: define the proportion of elements in the data matrix used as test set for hyperparameter tuning.  
-5. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations;
+5. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations, so global_tol equal 1e-9 is equivalent to the stopping criteria defined in our preprint in references.
 6. *sub_tol*: defines the convergence criteria for elastic net problems;
 7. *tuning_iter*: the number of iterations to run for each try of hyperparameter combinations.
 8. *max_iter*: the maximum number of iterations. When it is reached, iteration will terminate even if the global convergence criteria do not meet.
