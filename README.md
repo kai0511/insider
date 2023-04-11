@@ -114,7 +114,7 @@ The fitted object obtained from the above command is R list object, containing t
 2. confounder matrix
 3. train_indicator: an indicator matrix for elements to be concluded as train set.
 4. params: parameter setting for INSIDER
-6. cfd_matrices: a list of low-rank representations for biological variables and interaction. One can access the low-rank representation for a specific biological variable with the index of the variable in the confounder matrix.
+6. cfd_matrices: a list of low-rank representations for biological variables and interaction. One can access the low-rank representation for a specific biological variable with the index of the variable in the confounder matrix. The low-rank representation for the interaction is the last matrix of the cfd_matrices List.
 7. column_factor: gene latent representation matrix of K * M, where K is the num_factors and M is the number of genes.
 
 For downstream analysis with results from INSIDER, please refer to preprint in references. 
