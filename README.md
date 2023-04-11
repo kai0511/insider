@@ -106,3 +106,8 @@ The fitted object obtained from the above command is R list object, containing t
 6. cfd_matrices: a list of low-rank representations for biological variables and interaction. One can access the low-rank representation for a specific biological variable with the index of the variable in the confounder matrix.
 7. column_factor: gene latent representation matrix of K * M, where K is the num_factors and M is the number of genes.
 
+* Downstream analysis
+For downstream analysis with results from INSIDER, please refer to preprint in references. 
+
+## References
+Zhao, Kai, et al. "INSIDER: Interpretable Sparse Matrix Decomposition for Bulk RNA Expression Data Analysis." bioRxiv (2022): 2022-11.
