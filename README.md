@@ -29,15 +29,17 @@ R CMD INSTALL insider_1.0.tar.gz
 ```{r}
 require(insider)
 
-load('~/data/multi_dimensional_datasets/ageing_dataset_annotated_with_phenotypes_filtered.RData')
-dataset <- dataset[,-1]
+load('ageing_example_data.RData')
+dataset <- dataset[,-1]   # The first column is rnaseq_profile_id
 
 end_idx <- 3  # The end index for covariate matrix
-data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)  # log transformed expression data matrix
 data[is.na(data)] <- 0 # cast NAs to zeros
+data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)  # log transformed expression data matrix
 
+# In the example data, there are three biological variables: pid (phenotype id), sid (brain structure id), and did (donor id).
 confounders <- as.matrix(dataset[ ,1:end_idx])   # matrix for covariates ()
 ```
+
 * Create INSIDER object
 ```{r}
 object <- insider(data, confounders, interaction_idx = as.integer(c(1,2)), split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30)
@@ -45,7 +47,7 @@ object <- insider(data, confounders, interaction_idx = as.integer(c(1,2)), split
 It needs the following arguments:
 1. *data*: A log-transformed expression data matrix;
 2. *confounder*: A confounder matrix;
-3. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between the first and second variables;
+3. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between phenotype and brain structures, with the above example data;
 4. *split_ratio*: define the proportion of elements in the data matrix used as test set for hyperparameter tuning.  
 5. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations;
 6. *sub_tol*: defines the convergence criteria for elastic net problems;
@@ -70,4 +72,37 @@ lambda <- 10
 alpha <- 0.4
 object <- fit(object, as.integer(num_factors), lambda = lambda, alpha = alpha)
 save(object, file = paste0("insider_ageing_R", num_factors, "_fitted_object.RData"))
+
+> str(object)
+List of 7
+ $ data           : num [1:377, 1:44477] 0 0 0 0 0.336 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : NULL
+  .. ..$ : chr [1:44477] "X499304660" "X499304661" "X499304664" "X499304666" ...
+ $ confounder     : num [1:377, 1:4] 1 1 1 1 1 1 2 2 2 2 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : NULL
+  .. ..$ : chr [1:4] "pid" "sid" "did" "interaction_indicator"
+ $ train_indicator: int [1:377, 1:44477] 1 1 1 1 0 1 1 1 1 1 ...
+ $ params         :List of 4
+  ..$ global_tol : num 1e-10
+  ..$ sub_tol    : num 1e-05
+  ..$ tuning_iter: num 30
+  ..$ max_iter   : num 50000
+ $ cfd_matrices   :List of 4
+  ..$ factor0: num [1:2, 1:27] -0.155 0.128 0.144 -0.217 0.862 ...
+  ..$ factor1: num [1:8, 1:27] -0.0301 -0.057 -0.2099 0.1279 0.0856 ...
+  ..$ factor2: num [1:107, 1:27] -0.377 -0.778 -0.11 -0.552 0.251 ...
+  ..$ factor3: num [1:16, 1:27] -0.000318 0.196197 -0.040399 0.031864 0.053713 ...
+ $ column_factor  : num [1:27, 1:44477] 0 0.00386 0 -0.00831 0 ...
+ - attr(*, "class")= chr "insider"
 ```
+
+The fitted object obtained from the above command is R list object, containing the following object:
+1. log-transformed expression data matrix;
+2. confounder matrix
+3. train_indicator: an indicator matrix for elements to be concluded as train set.
+4. params: parameter setting for INSIDER
+6. cfd_matrices: a list of low-rank representations for biological variables and interaction. One can access the low-rank representation for a specific biological variable with the index of the variable in the confounder matrix.
+7. column_factor: gene latent representation matrix of K * M, where K is the num_factors and M is the number of genes.
+
