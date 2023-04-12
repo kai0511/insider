@@ -57,7 +57,7 @@ object <- insider(data, confounders, interaction_idx = as.integer(c(1,2)), split
 ```
 It needs the following arguments:
 1. *data*: A log-transformed expression data matrix;
-2. *confounder*: A confounder matrix. The elements of the matrix are used as indices to extract corresponding latent representation, so its elements are integer and greater 0;
+2. *confounder*: A confounder matrix. The elements of the matrix are used as indices to extract corresponding latent representation, so its elements are integer and greater than 0;
 3. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between phenotype and brain structures, with the above example data;
 4. *split_ratio*: define the proportion of elements in the data matrix used as test set for hyperparameter tuning.  
 5. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations, so global_tol equal 1e-9 is equivalent to the stopping criteria defined in our preprint in references.
