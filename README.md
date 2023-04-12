@@ -109,7 +109,7 @@ List of 7
  - attr(*, "class")= chr "insider"
 ```
 
-The fitted object obtained from the above command is R list object, containing the following object:
+The fitted object obtained from the above command is an R list object, containing the following elements:
 1. log-transformed expression data matrix;
 2. confounder matrix
 3. train_indicator: an indicator matrix for elements to be concluded as train set.
