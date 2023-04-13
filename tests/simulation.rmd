@@ -1,0 +1,74 @@
+---
+title: "Simulation studies for INSIDER"
+author: "ZHAO Kai"
+header-includes:
+  - \usepackage{xcolor}
+fontsize: 10pt
+mainfont: "Times New Roman"
+output: pdf_document
+---
+
+```{r}
+require(INSIDER)
+```
+
+# Data generation
+
+## generate latent representations for biological variables
+```{r}
+generate_latent_matrix <- function(v1_num, v2_num, inter_num, gene_num, latent_dim = 5){
+  v1_rep <- matrix(rnorm(v1_num * latent_dim), ncol = latent_dim)
+  v2_rep <- matrix(rnorm(v2_num * latent_dim), ncol = latent_dim)
+  inter_rep <- matrix(rnorm(inter_num * latent_dim), ncol = latent_dim)
+
+  # introduce sparsity
+  gene_rep <- matrix(rnorm(latent_dim * gene_num), nrow = latent_dim)
+  gene_rep[sample(1:length(gene_rep), 0.5*length(gene_rep))] <- 0
+
+  return(list(v1_rep, v2_rep, inter_rep, gene_rep))
+}
+```
+
+## generate latent representations for biological variables
+```{r}
+v1_num <- 50 
+v2_num <- 5
+obs_number <- 250
+gene_number <- 500
+
+v1_dis <- rep(0, v1_num * v2_num)
+v2_dis <- rep(1:v2_num, v1_num)
+for(i in seq(v1_num)){
+  st_idx <- (i - 1) * v2_num + 1
+  v1_dis[st_idx:(st_idx + v2_num - 1)] <- rep(i, v2_num)
+}
+confounder <- cbind(v1_dis, v2_dis)
+
+unique_cfd <- unique(confounder)
+inter_dis <- rep(0, obs_number)
+
+for(k in 1:nrow(unique_cfd)){
+  selected <- apply(confounder, 1, function(x) all(x == unique_cfd[k,]))
+  inter_dis[selected] <- k
+}
+confounder <- cbind(confounder, inter_dis)
+
+latent_matrix <- generate_latent_matrix(v1_num, v2_num, v1_num*v2_num, gene_number)
+
+expr <- latent_matrix[[1]][confounder[,1],] %*% latent_matrix[[4]]+
+  latent_matrix[[2]][confounder[,2],] %*% latent_matrix[[4]]+
+  latent_matrix[[3]][confounder[,3],] %*% latent_matrix[[4]]
+
+noise <- array(rnorm(v1_num*v2_num*gene_number, 0, 1), c(v1_num * v2_num, gene_number))
+simulation_obj <- list(latent_matrix, expr, noise)
+save(simulation_obj, file = "simulation_obj.RData")
+
+setwd("~/Documents/Research/Insider/simulation")
+data_matrix <- expr + noise
+dataset <- cbind(confounder[,-3], data_matrix)
+save(dataset, file = "simulation_dataset.RData")
+
+data_sda <- do.call(rbind, lapply(seq(v2_num), function(i) data_matrix[confounder[,2] == i,]))
+save(data_sda, file = "simulation_dataset_sda_formated.RData")
+write.table(data_sda, file = "simulation_data.txt", row.names = F, col.names = F, quote = F)
+```
