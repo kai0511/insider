@@ -23,7 +23,7 @@ generate_latent_matrix <- function(v1_num, v2_num, inter_num, gene_num, latent_d
 
   # introduce sparsity
   gene_rep <- matrix(rnorm(latent_dim * gene_num), nrow = latent_dim)
-  gene_rep[sample(1:length(gene_rep), 0.5*length(gene_rep))] <- 0
+  gene_rep[, sample(gene_num, 0.3*gene_num)] <- 0
 
   return(list(v1_rep, v2_rep, inter_rep, gene_rep))
 }
@@ -34,7 +34,8 @@ generate_latent_matrix <- function(v1_num, v2_num, inter_num, gene_num, latent_d
 v1_num <- 50 
 v2_num <- 5
 obs_number <- 250
-gene_number <- 500
+gene_number <- 200
+noise_var <- 1
 
 v1_dis <- rep(0, v1_num * v2_num)
 v2_dis <- rep(1:v2_num, v1_num)
@@ -59,16 +60,16 @@ expr <- latent_matrix[[1]][confounder[,1],] %*% latent_matrix[[4]]+
   latent_matrix[[2]][confounder[,2],] %*% latent_matrix[[4]]+
   latent_matrix[[3]][confounder[,3],] %*% latent_matrix[[4]]
 
-noise <- array(rnorm(v1_num*v2_num*gene_number, 0, 1), c(v1_num * v2_num, gene_number))
-simulation_obj <- list(latent_matrix, expr, noise)
-save(simulation_obj, file = "simulation_obj.RData")
+noise <- array(rnorm(v1_num*v2_num*gene_number, 0, noise_var), c(v1_num * v2_num, gene_number))
+simulation_obj <- list(confounder, latent_matrix, expr, noise)
+save(simulation_obj, file = paste0("simulation_obj_", noise_var, ".RData"))
 
 setwd("~/Documents/Research/Insider/simulation")
 data_matrix <- expr + noise
 dataset <- cbind(confounder[,-3], data_matrix)
-save(dataset, file = "simulation_dataset.RData")
+save(dataset, file = paste0("simulation_dataset_", noise_var, ".RData"))
 
 data_sda <- do.call(rbind, lapply(seq(v2_num), function(i) data_matrix[confounder[,2] == i,]))
 save(data_sda, file = "simulation_dataset_sda_formated.RData")
-write.table(data_sda, file = "simulation_data.txt", row.names = F, col.names = F, quote = F)
+write.table(data_sda, file = paste0("simulation_data_", noise_var, ".txt"), row.names = F, col.names = F, quote = F)
 ```
