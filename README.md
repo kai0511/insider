@@ -45,7 +45,7 @@ head(dataset[,1:5])
 dataset <- dataset[,-1]   # The first column is rna-seq_profile_id
 
 end_idx <- 3  # The end index for covariate matrix
-data[is.na(data)] <- 0 # cast NAs to zeros
+dataset[is.na(dataset)] <- 0 # cast NAs to zeros
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)  # log transformed expression data matrix
 
 # In the example data, there are three biological variables: pid (phenotype id), sid (brain structure id), and did (donor id).
