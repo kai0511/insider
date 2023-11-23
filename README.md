@@ -43,13 +43,20 @@ head(dataset[,1:5])
 
 dataset <- dataset[,-1]   # The first column is rna-seq_profile_id
 
-end_idx <- 3  # The end index for covariate matrix
-data[is.na(data)] <- 0 # cast NAs to zeros
 data <- log2(as.matrix(dataset[ ,-c(1:end_idx)]) + 1)  # log transformed expression data matrix
-
-# In the example data, there are three biological variables: pid (phenotype id), sid (brain structure id), and did (donor id).
-confounders <- as.matrix(dataset[ ,1:end_idx])   # matrix for biological variables
 ```
+* Prepare the matrix of covariates for INSIDER
+```{r}
+end_idx <- 3  # The end index for covariate matrix
+# In the example data, there are three biological variables (covariates): pid (phenotype id), sid (brain structure id), and did (donor id). Each column of the confounders matrix stands a variable with integer values indicating catergories for the variable.
+confounders <- as.matrix(dataset[ ,1:end_idx])   # matrix for covariates
+```
+
+* In the case that the information for covariates is not available (e.g., the information for donor, phenotype, tissue is missing), INSIDER can be applied the following ways to obtain low-rank representation for each observation. 
+```{r}
+confounders <- as.matrix(1:nrow(data))
+```
+Here the line of code means that we only have one variable and each observation belongs a unique **category**.
 
 * Create INSIDER object
 ```{r}
