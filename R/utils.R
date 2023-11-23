@@ -75,12 +75,13 @@ obtain_indication_matrix <- function(trainset, only_positive = F){
 #'
 #' @examples results <- ratio_splitter(data)
 
-ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T){
+ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T, seed = 123){
     # default ratio for test is 0.1, that is, 10% obs. will be randomly assigned to testset
     
     train_indicator <- matrix(T, nrow = nrow(data), ncol = ncol(data))
     testset <- matrix(0, nrow = nrow(data), ncol = ncol(data))
 
+    set.seed(seed)
     test_idx <- sample(seq(length(data)), floor(length(data) * ratio), replace = F)
     testset[test_idx] <- data[test_idx]
     data[test_idx] <- 0
