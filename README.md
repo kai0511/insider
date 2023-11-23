@@ -26,7 +26,8 @@ R CMD INSTALL insider_1.0.tar.gz
 ## Usage
 
 * Data preparation
-Here we use a small proportion of the ageing dataset (377*44477) as data matrix for tony example. For demonstration purpose, the dimension of example data matrix is 377 by 5000. One can download the data for analysis with INSIDER.
+
+Here we use a small proportion of the ageing dataset (377*44477) as data matrix for a toy example. For demonstration purpose, the dimension of example data matrix is 377 by 5000. One can download the data for analysis with INSIDER.
 ```{r}
 require(insider)
 
