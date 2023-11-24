@@ -98,8 +98,14 @@ tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
             
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
-            fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+            if(length(lambda) == 1 & length(alpha) == 1){
+                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+                    latent_rank, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
+            } else {
+                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
                     latent_rank, 0.1, 0.1, 1, global_tol, sub_tol, tuning_iter);
+            }
+            
 
             if(is.null(rank_tuning)){
                 rank_tuning <- c(latent_rank, fitted_obj$train_rmse, fitted_obj$test_rmse)
