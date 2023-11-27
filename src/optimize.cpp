@@ -130,7 +130,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
 // [[Rcpp::export]]
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
-              const int latent_dim, const double lambda = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
+              const int latent_dim, const double lambda1 = 1.0, const double lambda2 = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
     
     cout.precision(12);
     double delta_loss;
@@ -179,7 +179,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     predict(row_factor, column_factor, predictions);
     residual = data - predictions;
     evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
-    loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
+    loss = compute_loss(cfd_matrices, column_factor, lambda1, lambda2, alpha, sum_residual, 1);
 
     while(iter <= max_iter) {
 
@@ -191,11 +191,11 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         gram = column_factor * column_factor.t();
         for(i = 0; i < cfd_num; i++){
             residual += index_matrices(i) * cfd_matrices(i) * column_factor;
-            optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda, tuning);
+            optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
             if(i != cfd_num - 1){
                 residual -= index_matrices(i) * cfd_matrices(i) * column_factor;
             }
-	    // pre_loss = loss;
+	        // pre_loss = loss;
             // evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             // loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
 
@@ -211,7 +211,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         }
 
         // update columm_factor
-        optimize_col(data, train_indicator, row_factor, column_factor, lambda, alpha, tuning, 30, sub_tol * decay);
+        optimize_col(data, train_indicator, row_factor, column_factor, lambda2, alpha, tuning, 30, sub_tol * decay);
         predict(row_factor, column_factor, predictions);
         residual = data - predictions;
         
@@ -219,7 +219,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         if(iter % 10 == 0){
             pre_loss = loss;
             evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
-            loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
+            loss = compute_loss(cfd_matrices, column_factor, lambda1, lambda2, alpha, sum_residual, 1);
             
             delta_loss = pre_loss - loss;
             cout << "Delta loss for iter " << iter << ":" << delta_loss << endl;

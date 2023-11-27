@@ -22,7 +22,7 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx, double
               const int& iter /* = 0*/, const int& verbose /*= 1*/);
 
 double compute_loss(const field<mat>& cfd_factor, const mat& column_factor, 
-                    const double& lambda, const double& alpha, 
+                    const double& lambda1, const double& lambda2, const double& alpha, 
                     double& sum_residual, const int& verbose /*= 1*/);
 
 #endif

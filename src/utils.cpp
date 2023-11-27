@@ -34,7 +34,6 @@ uvec find_equal_rows(const umat& m, const subview_row<unsigned int>& v){
     return find(indices);
 }
 
-
 double objective(const mat& X, const vec& y, const vec& beta,
                  const double& lambda, const double& alpha){
     vec residual = y - X * beta;
@@ -77,19 +76,19 @@ void evaluate(mat& residual, const uvec& train_idx, const uvec& test_idx,
     }
 }
 
-double compute_loss(const field<mat>& cfd_factor, const mat& column_factor, const double& lambda, const double& alpha, 
+double compute_loss(const field<mat>& cfd_factor, const mat& column_factor, const double& lambda1, const double& lambda2, const double& alpha, 
                     double& sum_residual, const int& verbose = 1){
 
     // l2 penalty 
     double row_reg = 0.0;
     for(unsigned int i = 0; i < cfd_factor.n_elem; i++){
-        row_reg += lambda * pow(norm(cfd_factor(i), "F"), 2);
+        row_reg += lambda1 * pow(norm(cfd_factor(i), "F"), 2);
     }
     
-    double col_reg = lambda * (1 - alpha) * pow(norm(column_factor, "F"), 2);
+    double col_reg = lambda2 * (1 - alpha) * pow(norm(column_factor, "F"), 2);
     
     //  l1 penalty
-    double l1_reg = lambda * alpha * sum(sum(abs(column_factor), 1));
+    double l1_reg = lambda2 * alpha * sum(sum(abs(column_factor), 1));
 
     double loss = sum_residual/2 + row_reg/2 + col_reg/2 + l1_reg;
 
