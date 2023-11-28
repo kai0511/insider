@@ -119,7 +119,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
 
     # select the latent rank with the lowest optimal rmse
     if(length(latent_dimension) > 1){
-        latent_rank <- latent_dimension[which.min(rank_tuning[,2])]
+        latent_rank <- latent_dimension[which.min(rank_tuning[,3])]
     }else{
         latent_rank <- latent_dimension
     }
