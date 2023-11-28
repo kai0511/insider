@@ -66,7 +66,7 @@ insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1,
 #'
 #' @examples object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(1, 50, by = 5), alpha = seq(0.1, 0.6, by = 0.1))
 #' 
-tune <- function(object, latent_dimension = NULL, lambda = 1.0, alpha = 0.1){
+tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
     
     if(!is.integer(latent_dimension) | !is.numeric(lambda) | !is.numeric(alpha)){
         stop("TUNNING: The element of latent_dimension, lambda, and alpha should be integer, numeric, and numeric.")
