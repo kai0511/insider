@@ -100,10 +100,10 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
 
             if(length(lambda) == 1 & length(alpha) == 1){
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                    latent_rank, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
+                    latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
             } else {
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                    latent_rank, 0.1, 0.1, 1, global_tol, sub_tol, tuning_iter);
+                    latent_rank, 0.1, 0.1, 0, 1, global_tol, sub_tol, tuning_iter);
             }
             
 
@@ -144,7 +144,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
             alpha <- round(param_grid[i, 2], 2)
 
             fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                                   latent_rank, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
+                                   latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(reg_tuning)){
                 reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$train_rmse, fitted_obj$test_rmse)
@@ -185,7 +185,7 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, pa
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
     fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                           latent_dimension, lambda, alpha, partition, global_tol, sub_tol, max_iter);
+                           latent_dimension, lambda, lambda, alpha, partition, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
     object[['column_factor']] <- fitted_obj[['column_factor']]
