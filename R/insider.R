@@ -124,7 +124,7 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
     }
     
     # tune lambda and alpha with the selected latent rank
-    if(length(lambda) > 1 | length(alpha) > 1){
+    if(length(lambda1) > 1 | length(alpha) > 1){
 
         confounder_num <- ncol(object[['confounder']])
         confounder_list <- lapply(1:confounder_num, function(i){
