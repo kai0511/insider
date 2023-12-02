@@ -99,9 +99,9 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
             if(alpha == 0.0){
                 XtX.diag() += lambda; 
-                c_factor.col(i) = solve(XtX, Xty.col(i), solve_opts::likely_sympd);
+                c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
-                c_factor.col(i) = strong_coordinate_descent(feature, outcome, c_factor.col(i), lambda, alpha, XtX, Xty.col(i), tol);
+                c_factor.col(i) = strong_coordinate_descent(feature, outcome, c_factor.col(i), lambda, alpha, XtX, Xty, tol);
             }
         }
 
