@@ -97,7 +97,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             outcome = outcome(selected);
             vec Xty = trans(feature) * outcome;
 
-            if(alpha == 0){
+            if(alpha == 0.0){
                 XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
@@ -115,7 +115,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         #endif
         for(unsigned int i = 0; i < residual.n_cols; i++) {
             
-            if(alpha == 0){
+            if(alpha == 0.0){
                 XtX.diag() += lambda; 
                 c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
             }else{
