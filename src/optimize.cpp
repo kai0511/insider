@@ -110,15 +110,15 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
         mat XtX = trans(row_factor) * row_factor;
         mat Xty = trans(row_factor) * residual;
 
-        #if defined(_OPENMP)
-            #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
-        #endif
-        for(unsigned int i = 0; i < residual.n_cols; i++) {
-            
-            if(alpha == 0.0){
-                XtX.diag() += lambda; 
-                c_factor.col(i) = solve(XtX, Xty.col(i), solve_opts::likely_sympd);
-            }else{
+        if (alpha == 0.0) {
+            XtX.diag() += lambda; 
+            // c_factor.col(i) = solve(XtX, Xty.col(i), solve_opts::likely_sympd);
+            c_factor = solve(XtX, Xty, solve_opts::likely_sympd);
+        } else {
+            #if defined(_OPENMP)
+                #pragma omp parallel for num_threads(n_cores) schedule(dynamic, 100)
+            #endif
+            for(unsigned int i = 0; i < residual.n_cols; i++) {
                 c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i), lambda, alpha, XtX, Xty.col(i), tol);
             }
         }
