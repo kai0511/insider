@@ -75,7 +75,7 @@ void optimize_row(const mat& residual, const mat& indicator, mat& updating_facto
 
 void optimize_col(const mat& residual, const mat& indicator, const mat& row_factor, mat& c_factor, 
                   const double& lambda, const double& alpha, const int tuning, const int n_cores = 10, const double tol = 1e-5){
-    
+  
     if(tuning == 1){
         
         mat gram = trans(row_factor) * row_factor;
@@ -117,7 +117,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
             
             if(alpha == 0.0){
                 XtX.diag() += lambda; 
-                c_factor.col(i) = solve(XtX, Xty, solve_opts::likely_sympd);
+                c_factor.col(i) = solve(XtX, Xty.col(i), solve_opts::likely_sympd);
             }else{
                 c_factor.col(i) = strong_coordinate_descent(row_factor, residual.col(i), c_factor.col(i), lambda, alpha, XtX, Xty.col(i), tol);
             }
