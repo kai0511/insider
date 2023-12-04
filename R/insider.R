@@ -127,12 +127,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
     if(length(lambda) > 1 | length(alpha) > 1){
 
         confounder_num <- ncol(object[['confounder']])
-        confounder_list <- lapply(1:confounder_num, function(i){
-            factor_num <- length(unique(object[['confounder']][,i]))
-            matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
-        })
-    
-        column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
+        
 
         param_grid <- expand.grid(lambda = lambda, alpha = alpha)
 
@@ -141,6 +136,13 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
             
             lambda <- round(param_grid[i, 1], 2)
             alpha <- round(param_grid[i, 2], 2)
+
+            confounder_list <- lapply(1:confounder_num, function(i){
+                factor_num <- length(unique(object[['confounder']][,i]))
+                matrix(init_parameters(factor_num * latent_rank), ncol = latent_rank)
+            })
+    
+            column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
             fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
                                    latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
