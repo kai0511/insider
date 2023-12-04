@@ -35,7 +35,7 @@ insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1,
             selected <- apply(confounder[, interaction_idx], 1, function(x) all(x == unique_cfd[k,]))
             interaction_indicator[selected] <- k
         }
-        object[['confounder']] <- cbind(confounder[,1], interaction_indicator, confounder[,2:ncol(confounder)])
+        object[['confounder']] <- cbind(confounder, interaction_indicator)
         
     }else if(is.null(interaction_idx)){
         object[['confounder']] <- cbind(confounder)
