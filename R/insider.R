@@ -98,9 +98,9 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
             
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
-            if(length(lambda) == 1 & length(alpha) == 1){
+            if(length(lambda1) == 1 & length(alpha) == 1){
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
-                    latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
+                    latent_rank, lambda1, lambda2, alpha, 1, global_tol, sub_tol, tuning_iter);
             } else {
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
                     latent_rank, 0.1, 0.1, 0, 1, global_tol, sub_tol, tuning_iter);
