@@ -196,7 +196,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             residual += index_matrices(i) * cfd_matrices(i) * column_factor;
             optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
             
-            if(i != ord(cfd_num - 1)){
+            if(i != cfd_num - 1){
                 residual -= index_matrices(i) * cfd_matrices(i) * column_factor;
             }
 	        // pre_loss = loss;
