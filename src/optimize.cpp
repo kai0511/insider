@@ -189,10 +189,10 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
         // update all confonding matrices
         gram = column_factor * column_factor.t();
-        ord = randperm(cfd_num);
-        
-        for(j = 0; j < cfd_num; j++){
-            i = ord(j);
+        // ord = randperm(cfd_num);
+
+        for(i = 0; i < cfd_num; i++){
+            // i = ord(j);
             residual += index_matrices(i) * cfd_matrices(i) * column_factor;
             optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
             
