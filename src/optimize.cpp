@@ -134,8 +134,8 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     
     cout.precision(12);
     double delta_loss;
-    unsigned int i, iter = 0, cfd_num = cfd_factors.size();
-    uvec train_idx, test_idx;
+    unsigned int i, j, iter = 0, cfd_num = cfd_factors.size();
+    uvec train_idx, test_idx, ord;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
     mat gram, residual, sub_matrix; 
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
@@ -189,10 +189,14 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
         // update all confonding matrices
         gram = column_factor * column_factor.t();
-        for(i = 0; i < cfd_num; i++){
+        ord = randperm(cfd_num);
+        
+        for(j = 0; j < cfd_num; j++){
+            i = ord(j);
             residual += index_matrices(i) * cfd_matrices(i) * column_factor;
             optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
-            if(i != cfd_num - 1){
+            
+            if(i != ord(cfd_num - 1)){
                 residual -= index_matrices(i) * cfd_matrices(i) * column_factor;
             }
 	        // pre_loss = loss;
