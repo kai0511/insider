@@ -93,7 +93,7 @@ ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T, seed = 123){
     # obtain testset and indices for it
     test_indicator <- matrix(F, nrow = nrow(data), ncol = ncol(data))
     testset <- matrix(0, nrow = nrow(data), ncol = ncol(data))
-    test_indicator[test_idx] <- F
+    test_indicator[test_idx] <- T
     testset[test_idx] <- data[test_idx]
     data[test_idx] <- 0
     
