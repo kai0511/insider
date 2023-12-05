@@ -129,7 +129,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 }
 
 // [[Rcpp::export]]
-List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, 
+List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const mat& test_indicator,
               const int latent_dim, const double lambda1 = 1.0, const double lambda2 = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
     
     cout.precision(12);
@@ -173,7 +173,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
     // find the indices for training and testing elements 
     train_idx = find(train_indicator);
-    test_idx = find(train_indicator == 0);
+    test_idx = find(test_indicator);
 
     // check the fitting with initial values
     predict(row_factor, column_factor, predictions);

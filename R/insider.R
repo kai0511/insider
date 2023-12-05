@@ -45,6 +45,8 @@ insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1,
 
     # generate indicator for easy operation in C++
     object[['train_indicator']] <- apply(dataset[['train_indicator']], 2, as.integer)
+    object[['test_indicator']] <- apply(dataset[['test_indicator']], 2, as.integer)
+    object[['na_indicator']] <- apply(dataset[['na_indicator']], 2, as.integer)
 
     params <- list(global_tol = global_tol, sub_tol = sub_tol,
                    tuning_iter = tuning_iter, max_iter = max_iter)
@@ -99,10 +101,10 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
             if(length(lambda) == 1 & length(alpha) == 1){
-                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
                     latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
             } else {
-                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+                fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
                     latent_rank, 0.1, 0.1, 0, 1, global_tol, sub_tol, tuning_iter);
             }
             
@@ -144,7 +146,7 @@ tune <- function(object, latent_dimension = NULL, lambda = 0.1, alpha = 0.0){
     
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
-            fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+            fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
                                    latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(reg_tuning)){
@@ -185,7 +187,7 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, pa
 
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
-    fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], 
+    fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
                            latent_dimension, lambda, lambda, alpha, partition, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]

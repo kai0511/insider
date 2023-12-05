@@ -79,25 +79,40 @@ ratio_splitter <- function(data, ratio = 0.1, rm.na.col = T, seed = 123){
     # default ratio for test is 0.1, that is, 10% obs. will be randomly assigned to testset
     
     train_indicator <- matrix(T, nrow = nrow(data), ncol = ncol(data))
-    testset <- matrix(0, nrow = nrow(data), ncol = ncol(data))
 
+    # consider na index
+    na_indicator <- is.na(data)
+    data[na_indicator] <- 0
+    train_indicator[na_indicator] <- F
+
+    # sample test idx 
     set.seed(seed)
-    test_idx <- sample(seq(length(data)), floor(length(data) * ratio), replace = F)
+    existing_idx <- (1:length(data))[!na_indicator]
+    test_idx <- sample(existing_idx, floor(length(existing_idx) * ratio), replace = F)
+
+    # obtain testset and indices for it
+    test_indicator <- matrix(F, nrow = nrow(data), ncol = ncol(data))
+    testset <- matrix(0, nrow = nrow(data), ncol = ncol(data))
+    test_indicator[test_idx] <- F
     testset[test_idx] <- data[test_idx]
     data[test_idx] <- 0
-
+    
     train_indicator[test_idx] <- F
-
+    
     num_per_col <- apply(data, 2, function(x) sum(x != 0))
     cat(paste0('number of all zero columns removed: ',  sum(num_per_col == 0)), '\n')
     if (rm.na.col) {
-        return(list(trainset = data[,num_per_col != 0], 
+        return(list(trainset = data[, num_per_col != 0], 
                     testset = testset[, num_per_col != 0],
-                    train_indicator = train_indicator[,num_per_col != 0]))
-    } else{
+                    train_indicator = train_indicator[, num_per_col != 0], 
+                    test_indicator = test_indicator[, num_per_col != 0],
+                    na_indicator = na_indicator[, num_per_col != 0]))
+    } else {
         return(list(trainset = data, 
                     testset = testset,
-                    train_indicator = train_indicator))
+                    train_indicator = train_indicator, 
+                    test_indicator = test_indicator, 
+                    na_indicator = na_indicator))
     }
 }
 
