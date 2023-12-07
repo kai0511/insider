@@ -68,13 +68,13 @@ insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1,
 #'
 #' @examples object <- tune(object, latent_dimension = as.integer(num_factors), lambda = seq(1, 50, by = 5), alpha = seq(0.1, 0.6, by = 0.1))
 #' 
-tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, alpha = 0.0){
+tune <- function(object, latent_dimension = NULL, lambda = 0.1,  alpha = 0.0){
     
-    if(!is.integer(latent_dimension) | !is.numeric(lambda1) | !is.numeric(alpha)){
+    if(!is.integer(latent_dimension) | !is.numeric(lambda) | !is.numeric(alpha)){
         stop("TUNNING: The element of latent_dimension, lambda, and alpha should be integer, numeric, and numeric.")
     }
 
-    if((length(latent_dimension) <= 1) & (length(lambda1) <= 1 & length(alpha) <= 1)){
+    if((length(latent_dimension) <= 1) & (length(lambda) <= 1 & length(alpha) <= 1)){
         stop("TUNNING: The length of either latent_dimension or lambda and alpha should be greater than 1.")
     }
 
@@ -100,9 +100,9 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
             
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
-            if(length(lambda1) == 1 & length(alpha) == 1){
+            if(length(lambda) == 1 & length(alpha) == 1){
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
-                    latent_rank, lambda1, lambda2, alpha, 1, global_tol, sub_tol, tuning_iter);
+                    latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
             } else {
                 fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
                     latent_rank, 0.1, 0.1, 0, 1, global_tol, sub_tol, tuning_iter);
@@ -126,19 +126,18 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
     }
     
     # tune lambda and alpha with the selected latent rank
-    if(length(lambda1) > 1 | length(alpha) > 1){
+    if(length(lambda) > 1 | length(alpha) > 1){
 
         confounder_num <- ncol(object[['confounder']])
         
 
-        param_grid <- expand.grid(lambda1 = lambda1, lambda2 = lambda2, alpha = alpha)
+        param_grid <- expand.grid(lambda = lambda, alpha = alpha)
 
         for(i in seq(nrow(param_grid))){
             cat('parameter grid:', paste(round(param_grid[i,], 2), collapse = ','), "---------------------------------\n")
             
-            lambda1 <- round(param_grid[i, 1], 2)
-            lambda2 <- round(param_grid[i, 2], 2)
-            alpha <- round(param_grid[i, 3], 2)
+            lambda <- round(param_grid[i, 1], 2)
+            alpha <- round(param_grid[i, 2], 2)
 
             confounder_list <- lapply(1:confounder_num, function(i){
                 factor_num <- length(unique(object[['confounder']][,i]))
@@ -148,7 +147,7 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
             column_factor <- matrix(init_parameters(latent_rank * ncol(data)), nrow = latent_rank)
 
             fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
-                                   latent_rank, lambda1, lambda2, alpha, 1, global_tol, sub_tol, tuning_iter);
+                                   latent_rank, lambda, lambda, alpha, 1, global_tol, sub_tol, tuning_iter);
 
             if(is.null(reg_tuning)){
                 reg_tuning <- c(round(param_grid[i, ], 2), fitted_obj$train_rmse, fitted_obj$test_rmse)
@@ -174,7 +173,7 @@ tune <- function(object, latent_dimension = NULL, lambda1 = 0.1, lambda2 = 0.1, 
 #' @export
 #'
 #' @examples fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha, partition = 0)
-fit <- function(object, latent_dimension = NULL, lambda1 = NULL, lambda2 = NULL, alpha = NULL, partition = 0){
+fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, partition = 0){
     
     global_tol <- object[['params']][['global_tol']]
     sub_tol <- object[['params']][['sub_tol']]
@@ -189,7 +188,7 @@ fit <- function(object, latent_dimension = NULL, lambda1 = NULL, lambda2 = NULL,
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
     fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
-                           latent_dimension, lambda1, lambda2, alpha, partition, global_tol, sub_tol, max_iter);
+                           latent_dimension, lambda, lambda, alpha, partition, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
     object[['column_factor']] <- fitted_obj[['column_factor']]
