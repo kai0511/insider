@@ -22,6 +22,7 @@ insider <- function(data, confounder, interaction_idx = NULL, split_ratio = 0.1,
     # create insider class
     object <- structure(list(), class = "insider")
     object[['data']] <- data
+    object[['data']][object[['na_indicator']]] <- 0
 
     if(is.integer(interaction_idx) & (length(interaction_idx) > 1)){
         
