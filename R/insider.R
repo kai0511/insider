@@ -187,7 +187,8 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, pa
 
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
-    fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], object[['train_indicator']], object[['test_indicator']], 
+    indicator <- object[['train_indicator']] + object[['test_indicator']]
+    fitted_obj <- optimize(object[['data']], confounder_list, column_factor, object[['confounder']], indicator, object[['na_indicator']], 
                            latent_dimension, lambda, lambda, alpha, partition, global_tol, sub_tol, max_iter);
 
     object[['cfd_matrices']] <- fitted_obj[['row_matrices']]
