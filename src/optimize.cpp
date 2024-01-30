@@ -130,11 +130,11 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 
 // [[Rcpp::export]]
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const mat& test_indicator,
-              const int latent_dim, const double lambda1 = 1.0, const double lambda2 = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000){
+              const int latent_dim, const double lambda1 = 1.0, const double lambda2 = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000) {
     
     cout.precision(12);
     double delta_loss;
-    unsigned int i, j, iter = 0, cfd_num = cfd_factors.size();
+    unsigned int i, j, iter = 0, cfd_num = cfd_indicators.n_cols;
     uvec train_idx, test_idx, ord;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
     mat gram, residual, sub_matrix; 
