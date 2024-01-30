@@ -61,22 +61,24 @@ Here the line of code means that we only have one variable and each observation 
 
 * Create INSIDER object
 ```{r}
-object <- insider(data, confounders, interaction_idx = as.integer(c(1,2)), split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30)
+object <- insider(data, confounders, ctns_confounder, interaction_idx = as.integer(c(1,2)), split_ratio = 0.1, global_tol = 1e-9, sub_tol = 1e-5, tuning_iter = 30)
 ```
 It needs the following arguments:
 1. *data*: A log-transformed expression data matrix;
 2. *confounder*: A confounder matrix. The elements of the matrix are used as indices to extract corresponding latent representation, so its elements are integer and greater than 0;
-3. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between phenotype and brain structures, with the above example data;
-4. *split_ratio*: define the proportion of elements in the data matrix used as test set for hyperparameter tuning.  
-5. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations, so global_tol equal 1e-9 is equivalent to the stopping criteria defined in our preprint in references.
-6. *sub_tol*: defines the convergence criteria for elastic net problems;
-7. *tuning_iter*: the number of iterations to run for each try of hyperparameter combinations.
-8. *max_iter*: the maximum number of iterations. When it is reached, iteration will terminate even if the global convergence criteria do not meet.
+3. *ctns_confounder*: A confounder matrix for continuous variables. If not provided, ctns_confounder is NULL. 
+4. *interaction_idx*: An integer vector for indices of confounders to induce interaction. For example, as.integer(c(1,2)) means to consider interaction between phenotype and brain structures, with the above example data;
+5. *split_ratio*: define the proportion of elements in the data matrix used as test set for hyperparameter tuning.  
+6. *global_tol*: defines convergence tolerance for INSIDER. Note INSIDER check convergence every 10 iterations, so global_tol equal 1e-9 is equivalent to the stopping criteria defined in our preprint in references.
+7. *sub_tol*: defines the convergence criteria for elastic net problems;
+8. *tuning_iter*: the number of iterations to run for each try of hyperparameter combinations.
+9. *max_iter*: the maximum number of iterations. When it is reached, iteration will terminate even if the global convergence criteria do not meet.
 
 * Tune hyperparameters
 ```{r}
 object <- tune(object, latent_dimension = as.integer(seq(10, 30, by = 2)), lambda = seq(1, 20, by = 2), alpha = c(0.2, 0.3, 0.4, 0.5))
 ```
+
 It needs the following arguments:
 1. *object*: An INSIDER object created with the above arguments;
 2. *latent_dimension*: A integer vector from which the rank of latent dimension is chosen;
