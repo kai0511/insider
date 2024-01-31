@@ -200,7 +200,7 @@ fit <- function(object, latent_dimension = NULL, lambda = NULL, alpha = NULL, pa
     })
 
     if(object[['inc_continuous']] == 1){
-        confounder_list[[confounder_num + 1]] <- matrix(init_parameters(ncol(object[['ctns_confounder']]) * latent_rank), ncol = latent_rank)
+        confounder_list[[confounder_num + 1]] <- matrix(init_parameters(ncol(object[['ctns_confounder']]) * latent_dimension), ncol = latent_dimension)
     }
     column_factor <- matrix(init_parameters(latent_dimension * ncol(data)), nrow = latent_dimension)
 
