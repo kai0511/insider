@@ -8,9 +8,66 @@
 #include "coordinate_descent.h"
 #include "utils.h"
 
-
 using Rcpp::List;
 using Rcpp::Named;
+
+// [[Rcpp::export]]
+void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating_factor, const mat& c_factor,
+                         const vec& updating_confd, const mat& gram, const double lambda, const int tuning){
+
+    if(tuning == 1){
+
+        uvec non_zeros;
+        vec factor, outcome;
+
+        mat resid = data - updating_confd * updating_factor * c_factor;
+        // cout << size(resid) << endl;
+        double XtX, Xty, pre_loss = 0.0, delta_loss = 0.0;
+        double loss = 0.5 * (sum(square(resid.elem(find(indicator)))) + lambda * pow(norm(updating_factor, "F"), 2));
+
+        while(1){
+
+            for(int i = 0; i < c_factor.n_rows; i++) {
+
+                XtX = 0.0, Xty = 0.0;
+                resid += updating_factor(i) * updating_confd * c_factor.row(i);
+                factor = trans(c_factor.row(i));
+                // cout << 1 << endl;
+                for(int k = 0; k < indicator.n_rows; k++){
+                    non_zeros = find(indicator.row(k));
+
+                    outcome = trans(resid.row(k));
+                    outcome = outcome(non_zeros);
+
+                    XtX += std::pow(updating_confd(k), 2) * dot(factor(non_zeros), factor(non_zeros));
+                    Xty += updating_confd(k) * dot(factor(non_zeros), outcome);
+                }
+                updating_factor(i) = Xty/(XtX + lambda);
+                resid -= updating_factor(i) * updating_confd * c_factor.row(i);
+            }
+
+            pre_loss = loss;
+            loss = 0.5 * (sum(square(resid.elem(find(indicator)))) + lambda * pow(norm(updating_factor, "F"), 2));
+            delta_loss = pre_loss - loss;
+
+            if(delta_loss < 1e-5){
+                // cout << "Delta loss: " << delta_loss << endl;
+                break;
+            }
+        }
+    } else if(tuning == 0){
+        vec Xty = c_factor * trans(data) * updating_confd ;
+        mat XtX = dot(updating_confd, updating_confd) * gram;
+        XtX.diag() += lambda;
+        updating_factor = trans(solve(XtX, Xty, solve_opts::likely_sympd));
+
+    } else {
+        cout << "Parameter tuning should be either 0 or 1!" << endl;
+        exit(1);
+    }
+}
+
+
 
 void optimize_row(const mat& residual, const mat& indicator, mat& updating_factor, const mat& c_factor, 
                   const uvec& updating_confd, const mat& gram, const double lambda, const int tuning, const int n_cores = 10){
