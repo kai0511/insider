@@ -191,13 +191,14 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     double delta_loss;
     unsigned int i, j, iter = 0, cfd_num = cfd_indicators.n_cols;
     uvec train_idx, test_idx, ord;
+    rowvec updating_factor;
     double loss, pre_loss, sum_residual, train_rmse, test_rmse, decay = 1.0; 
     mat gram, residual, sub_matrix; 
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
 
     // to support continuous covariates
-    if(inc_continuous != 0 || inc_continuous != 1){
+    if(inc_continuous != 0 && inc_continuous != 1){
         cout << "The value of prarameter inc_continuous can only be 0 or 1." << endl;
         exit(1);
     }
@@ -270,8 +271,10 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             } else {
                 // to support continuous covariates
                 for (j = 0; j < ctns_confounder.n_cols; j++){
+                    updating_factor = cfd_matrices(i).row(j);
                     residual += ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
-                    optimize_continuous(residual, train_indicator, cfd_matrices(i).row(j), column_factor, ctns_confounder.col(j), gram, lambda1, tuning);
+                    optimize_continuous(residual, train_indicator, updating_factor, column_factor, ctns_confounder.col(j), gram, lambda1, tuning);
+                    cfd_matrices(i).row(j) = updating_factor;
                     if(j != ctns_confounder.n_cols - 1){
                         residual -= ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
                     }
