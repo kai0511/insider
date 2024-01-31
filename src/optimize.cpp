@@ -67,8 +67,6 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
     }
 }
 
-
-
 void optimize_row(const mat& residual, const mat& indicator, mat& updating_factor, const mat& c_factor, 
                   const uvec& updating_confd, const mat& gram, const double lambda, const int tuning, const int n_cores = 10){
     /*
@@ -186,7 +184,7 @@ void optimize_col(const mat& residual, const mat& indicator, const mat& row_fact
 }
 
 // [[Rcpp::export]]
-List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& train_indicator, const mat& test_indicator,
+List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat&ctns_confounder, const mat& train_indicator, const mat& test_indicator, const int& inc_continuous,
               const int latent_dim, const double lambda1 = 1.0, const double lambda2 = 1.0, const double alpha = 0.1, const int tuning = 1, const double global_tol=1e-10, const double sub_tol = 1e-5, const unsigned int max_iter = 10000) {
     
     cout.precision(12);
@@ -198,34 +196,50 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
     mat row_factor = zeros(data.n_rows, latent_dim) , predictions = zeros(size(data));
     List row_matrices;
 
-    // check whether the number of the confounding matrices is equal to the number of confounding indicators.
-    if(cfd_num != cfd_indicators.n_cols){
-        cout << "The number of confounding matrices should be the same the number of indicators." << endl;
+    // to support continuous covariates
+    if(inc_continuous != 0 || inc_continuous != 1){
+        cout << "The value of prarameter inc_continuous can only be 0 or 1." << endl;
         exit(1);
-    } 
+    }
+
+    // to support continuous covariates
+    if(inc_continuous == 1){
+        cfd_num += 1;
+    }
 
     // move confounding matrices from Rcpp::List into arma::field
     field<mat> cfd_matrices(cfd_num);
     for(i = 0; i < cfd_num; i ++) {
         Rcpp::NumericMatrix temp = cfd_factors[i];
         cfd_matrices(i) = mat(temp.begin(), temp.nrow(), temp.ncol(), false);
-        row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+        if(i < cfd_indicators.n_cols){
+            row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
+        }else{
+            // to support continuous covariates
+            row_factor += ctns_confounder * cfd_matrices(i);
+        }
     }
 
     // place indices of confounders into arma::field for computational consideration
     field<mat> index_matrices(cfd_num);
-    field<vec> confd_counts(cfd_num);
+    // field<vec> confd_counts(cfd_num);
     for(i = 0; i < cfd_num; i ++) {
-        uvec levels = unique(cfd_indicators.col(i));
-        mat cfd_idx = zeros(cfd_indicators.n_rows, levels.n_elem);
+        if(i < cfd_indicators.n_cols){
+            uvec levels = unique(cfd_indicators.col(i));
+            mat cfd_idx = zeros(cfd_indicators.n_rows, levels.n_elem);
 
-        for(unsigned int k = 0; k < levels.n_elem; k++) {
-            vec tmp = cfd_idx.col(k);
-            tmp.elem(find(cfd_indicators.col(i) == levels(k))).ones();
-            cfd_idx.col(k) = tmp;
+            for(unsigned int k = 0; k < levels.n_elem; k++) {
+                vec tmp = cfd_idx.col(k);
+                tmp.elem(find(cfd_indicators.col(i) == levels(k))).ones();
+                cfd_idx.col(k) = tmp;
+            }
+            index_matrices(i) = cfd_idx;
+            // confd_counts(i) = trans(sum(cfd_idx));
+        } else {
+            // to support continuous covariates
+            index_matrices(i) = ctns_confounder;
+            // confd_counts(i) = ones(cfd_indicators.n_rows);
         }
-        index_matrices(levels(i)-1) = cfd_idx;
-        confd_counts(levels(i)-1) = trans(sum(cfd_idx));
     }
 
     // find the indices for training and testing elements 
@@ -250,8 +264,19 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
 
         for(i = 0; i < cfd_num; i++){
             // i = ord(j);
-            residual += index_matrices(i) * cfd_matrices(i) * column_factor;
-            optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
+            if(i < cfd_indicators.n_cols){
+                residual += index_matrices(i) * cfd_matrices(i) * column_factor;
+                optimize_row(residual, train_indicator, cfd_matrices(i), column_factor, cfd_indicators.col(i), gram, lambda1, tuning);
+            } else {
+                // to support continuous covariates
+                for (j = 0; j < ctns_confounder.n_cols; j++){
+                    residual += ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
+                    optimize_continuous(residual, train_indicator, cfd_matrices(i).row(j), column_factor, ctns_confounder.col(j), gram, lambda1, tuning);
+                    if(j != ctns_confounder.n_cols - 1){
+                        residual -= ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
+                    }
+                }
+            }
             
             if(i != cfd_num - 1){
                 residual -= index_matrices(i) * cfd_matrices(i) * column_factor;
@@ -266,9 +291,13 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
         
         // compute row_factor
         row_factor.zeros();
-        for(i = 0; i < cfd_num; i ++) {
+        for(i = 0; i < cfd_indicators.n_cols; i ++) {
             // row_factor += cfd_matrices(i).rows(cfd_indicators.col(i) - 1);
             row_factor += index_matrices(i) * cfd_matrices(i);
+        }
+
+        if(inc_continuous == 1){
+            row_factor += ctns_confounder * cfd_matrices(cfd_num-1);
         }
 
         // update columm_factor
