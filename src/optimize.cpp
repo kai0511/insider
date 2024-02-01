@@ -75,7 +75,7 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
 
 // [[Rcpp::export]]
 void optimize_continuous_v2(const mat& data, const mat& indicator, rowvec& updating_factor, const mat& c_factor,
-                         const vec& updating_confd, const mat& gram, const double lambda, const int tuning){
+                            const vec& updating_confd, const mat& gram, const double lambda, const int tuning){
 
     if(tuning == 1){
 
@@ -342,7 +342,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
                 for (j = 0; j < ctns_confounder.n_cols; j++){
                     updating_factor = cfd_matrices(i).row(j);
                     residual += ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
-                    optimize_continuous(residual, train_indicator, updating_factor, column_factor, ctns_confounder.col(j), gram, lambda1, tuning);
+                    optimize_continuous_v2(residual, train_indicator, updating_factor, column_factor, ctns_confounder.col(j), gram, lambda1, tuning);
                     cfd_matrices(i).row(j) = updating_factor;
                     if(j != ctns_confounder.n_cols - 1){
                         residual -= ctns_confounder.col(j) * cfd_matrices(i).row(j) * column_factor;
@@ -353,7 +353,7 @@ List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat&
             if(i != cfd_num - 1){
                 residual -= index_matrices(i) * cfd_matrices(i) * column_factor;
             }
-	        // pre_loss = loss;
+            // pre_loss = loss;
             // evaluate(residual, train_idx, test_idx, sum_residual, train_rmse, test_rmse, tuning, iter, 1);
             // loss = compute_loss(cfd_matrices, column_factor, lambda, alpha, sum_residual, 1);
 

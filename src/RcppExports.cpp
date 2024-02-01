@@ -65,6 +65,23 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// optimize_continuous_v2
+void optimize_continuous_v2(const mat& data, const mat& indicator, rowvec& updating_factor, const mat& c_factor, const vec& updating_confd, const mat& gram, const double lambda, const int tuning);
+RcppExport SEXP _insider_optimize_continuous_v2(SEXP dataSEXP, SEXP indicatorSEXP, SEXP updating_factorSEXP, SEXP c_factorSEXP, SEXP updating_confdSEXP, SEXP gramSEXP, SEXP lambdaSEXP, SEXP tuningSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const mat& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const mat& >::type indicator(indicatorSEXP);
+    Rcpp::traits::input_parameter< rowvec& >::type updating_factor(updating_factorSEXP);
+    Rcpp::traits::input_parameter< const mat& >::type c_factor(c_factorSEXP);
+    Rcpp::traits::input_parameter< const vec& >::type updating_confd(updating_confdSEXP);
+    Rcpp::traits::input_parameter< const mat& >::type gram(gramSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const int >::type tuning(tuningSEXP);
+    optimize_continuous_v2(data, indicator, updating_factor, c_factor, updating_confd, gram, lambda, tuning);
+    return R_NilValue;
+END_RCPP
+}
 // optimize
 List optimize(const mat& data, List cfd_factors, mat& column_factor, const umat& cfd_indicators, const mat& ctns_confounder, const mat& train_indicator, const mat& test_indicator, const int& inc_continuous, const int latent_dim, const double lambda1, const double lambda2, const double alpha, const int tuning, const double global_tol, const double sub_tol, const unsigned int max_iter);
 RcppExport SEXP _insider_optimize(SEXP dataSEXP, SEXP cfd_factorsSEXP, SEXP column_factorSEXP, SEXP cfd_indicatorsSEXP, SEXP ctns_confounderSEXP, SEXP train_indicatorSEXP, SEXP test_indicatorSEXP, SEXP inc_continuousSEXP, SEXP latent_dimSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP alphaSEXP, SEXP tuningSEXP, SEXP global_tolSEXP, SEXP sub_tolSEXP, SEXP max_iterSEXP) {
@@ -96,6 +113,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_insider_coordinate_descent", (DL_FUNC) &_insider_coordinate_descent, 8},
     {"_insider_strong_coordinate_descent", (DL_FUNC) &_insider_strong_coordinate_descent, 8},
     {"_insider_optimize_continuous", (DL_FUNC) &_insider_optimize_continuous, 8},
+    {"_insider_optimize_continuous_v2", (DL_FUNC) &_insider_optimize_continuous_v2, 8},
     {"_insider_optimize", (DL_FUNC) &_insider_optimize, 16},
     {NULL, NULL, 0}
 };
