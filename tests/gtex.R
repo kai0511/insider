@@ -25,6 +25,8 @@ colnames(confounders) <- c('gender', 'structure')
 
 
 object <- insider(data, as.matrix(confounders), as.integer(c(1,2)), global_tol = 1e-10)
+# object <- insider(data, as.matrix(confounders), NULL, global_tol = 1e-10)
 # object <- tune(object, latent_dimension = as.integer(12), lambda = seq(30, 60, by = 5), alpha = c(0.3, 0.4, 0.5, 0.6)) 
-object <- fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha)
-save(object, file = "insider_gtex_fitted_object.RData")
+object <- tune(object, latent_dimension = as.integer(rep(12, 50)), lambda = lambda, alpha = alpha) 
+# object <- fit(object, latent_dimension = as.integer(num_factors), lambda = lambda, alpha = alpha)
+# save(object, file = "insider_gtex_fitted_object.RData")

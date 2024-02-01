@@ -8,7 +8,8 @@ require(insider)
 
 # options(error = dump_and_quit)
 
-num_factors <- 23 
+# num_factors <- 23 
+num_factors <- 25
 
 # regularization for iMF
 lambda <- 6  # original value 33.7777777777778

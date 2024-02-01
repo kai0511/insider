@@ -13,6 +13,10 @@ optimize_continuous <- function(data, indicator, updating_factor, c_factor, upda
     invisible(.Call(`_insider_optimize_continuous`, data, indicator, updating_factor, c_factor, updating_confd, gram, lambda, tuning))
 }
 
+optimize_continuous_v2 <- function(data, indicator, updating_factor, c_factor, updating_confd, gram, lambda, tuning) {
+    invisible(.Call(`_insider_optimize_continuous_v2`, data, indicator, updating_factor, c_factor, updating_confd, gram, lambda, tuning))
+}
+
 optimize <- function(data, cfd_factors, column_factor, cfd_indicators, ctns_confounder, train_indicator, test_indicator, inc_continuous, latent_dim, lambda1 = 1.0, lambda2 = 1.0, alpha = 0.1, tuning = 1L, global_tol = 1e-10, sub_tol = 1e-5, max_iter = 10000L) {
     .Call(`_insider_optimize`, data, cfd_factors, column_factor, cfd_indicators, ctns_confounder, train_indicator, test_indicator, inc_continuous, latent_dim, lambda1, lambda2, alpha, tuning, global_tol, sub_tol, max_iter)
 }
