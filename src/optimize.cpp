@@ -24,7 +24,10 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
         // cout << size(resid) << endl;
         double XtX, Xty, pre_loss = 0.0, delta_loss = 0.0;
         double loss = 0.5 * (sum(square(resid.elem(find(indicator)))) + lambda * pow(norm(updating_factor, "F"), 2));
-
+        
+        vec squared_confd = pow(updating_confd, 2);
+        mat squared_factor = pow(c_factor, 2);
+        
         while(1){
 
             for(int i = 0; i < c_factor.n_rows; i++) {
@@ -32,16 +35,19 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
                 XtX = 0.0, Xty = 0.0;
                 resid += updating_factor(i) * updating_confd * c_factor.row(i);
                 factor = trans(c_factor.row(i));
-                // cout << 1 << endl;
+
                 for(int k = 0; k < indicator.n_rows; k++){
                     non_zeros = find(indicator.row(k));
 
                     outcome = trans(resid.row(k));
                     outcome = outcome(non_zeros);
 
-                    XtX += std::pow(updating_confd(k), 2) * dot(factor(non_zeros), factor(non_zeros));
+                    XtX += squared_confd(k) * dot(factor(non_zeros), factor(non_zeros));
                     Xty += updating_confd(k) * dot(factor(non_zeros), outcome);
                 }
+
+                // XtX = dot(sum(indicator.each_row() % squared_factor.row(i), dim = 1), squared_confd);
+                // Xty = dot(sum((indicator.each_row() % c_factor.row(i)) % resid, dim = 1), updating_confd);
                 updating_factor(i) = Xty/(XtX + lambda);
                 resid -= updating_factor(i) * updating_confd * c_factor.row(i);
             }
@@ -50,7 +56,7 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
             loss = 0.5 * (sum(square(resid.elem(find(indicator)))) + lambda * pow(norm(updating_factor, "F"), 2));
             delta_loss = pre_loss - loss;
 
-            if(delta_loss < 1e-5){
+            if(delta_loss < 1e-3){
                 // cout << "Delta loss: " << delta_loss << endl;
                 break;
             }
