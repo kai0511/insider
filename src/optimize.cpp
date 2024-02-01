@@ -27,7 +27,7 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
         
         vec squared_confd = pow(updating_confd, 2);
         mat squared_factor = pow(c_factor, 2);
-        
+
         while(1){
 
             for(int i = 0; i < c_factor.n_rows; i++) {
@@ -58,6 +58,69 @@ void optimize_continuous(const mat& data, const mat& indicator, rowvec& updating
 
             if(delta_loss < 1e-3){
                 // cout << "Delta loss: " << delta_loss << endl;
+                break;
+            }
+        }
+    } else if(tuning == 0){
+        vec Xty = c_factor * trans(data) * updating_confd ;
+        mat XtX = dot(updating_confd, updating_confd) * gram;
+        XtX.diag() += lambda;
+        updating_factor = trans(solve(XtX, Xty, solve_opts::likely_sympd));
+
+    } else {
+        cout << "Parameter tuning should be either 0 or 1!" << endl;
+        exit(1);
+    }
+}
+
+// [[Rcpp::export]]
+void optimize_continuous_v2(const mat& data, const mat& indicator, rowvec& updating_factor, const mat& c_factor,
+                         const vec& updating_confd, const mat& gram, const double lambda, const int tuning){
+
+    if(tuning == 1){
+
+        int i = 0, k = 0;
+
+        mat resid = data - updating_confd * updating_factor * c_factor;
+        double XtX, Xty;
+
+        // double loss = 0.5 * (sum(square(resid.elem(find(indicator)))) + lambda * pow(norm(updating_factor, "F"), 2));
+        mat squared_factor = square(c_factor);
+        rowvec pre_updating_factor;
+        vec curr_squared_factor, squared_confd = pow(updating_confd, 2), norm_factor = sum(squared_factor, 1);
+        
+        field<uvec> zero_idx_vec(indicator.n_rows);
+        for(k = 0; k < indicator.n_rows; k++){
+            zero_idx_vec(k) = find(indicator.row(k) == 0);
+        }
+
+        // cube tmp(indicator.n_rows, indicator.n_cols, c_factor.n_rows);
+        // for(k = 0; k < c_factor.n_rows; k++){
+        //     tmp.slice(k) = updating_confd * c_factor.row(k);
+        // }
+
+        while(1){
+            pre_updating_factor = updating_factor;
+            for(i = 0; i < c_factor.n_rows; i++) {
+
+                XtX = 0.0, Xty = 0.0;
+                resid += updating_factor(i) * updating_confd * c_factor.row(i);
+                // resid += updating_factor(i) * tmp.slice(i);
+                curr_squared_factor = trans(squared_factor.row(i));
+
+                Xty = as_scalar(trans(updating_confd) * (indicator % resid) * trans(c_factor.row(i)));
+                for(k = 0; k < indicator.n_rows; k++){
+                    XtX += squared_confd(k) * (norm_factor(i) - sum(curr_squared_factor(zero_idx_vec(k))));
+                    // Xty += updating_confd(k) * (temp - dot(curr_factor(zero_idx_vec(k)), outcome));
+                }
+
+                updating_factor(i) = Xty/(XtX + lambda);
+                resid -= updating_factor(i) * updating_confd * c_factor.row(i);
+                // resid -= updating_factor(i) * tmp.slice(i); 
+            }
+
+            if(sum(abs(pre_updating_factor - updating_factor)) < 1e-1){
+                // cout << "Delta diff: " << sum(abs(pre_updating_factor - updating_factor)) << endl;
                 break;
             }
         }
