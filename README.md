@@ -130,4 +130,4 @@ The fitted object obtained from the above command is an R list object, containin
 For downstream analysis with results from INSIDER, please refer to preprint in references. 
 
 ## References
-Zhao, Kai, et al. "INSIDER: Interpretable Sparse Matrix Decomposition for Bulk RNA Expression Data Analysis." bioRxiv (2022): 2022-11.
+ZHAO, Kai, et al. INSIDER: Interpretable sparse matrix decomposition for RNA expression data analysis. *PLoS genetics*, 2024, 20.3: e1011189.
